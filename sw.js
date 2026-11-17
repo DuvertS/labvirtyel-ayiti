@@ -3,13 +3,13 @@
    IMPORTANT : à chaque modification du site, augmentez VERSION pour que les téléphones
    téléchargent la nouvelle version. */
 
-var VERSION = 'lv-v2';
+var VERSION = 'lv-v3';
 var FILES = [
   './',
   'index.html', 'bibliotheque.html', 'ressource.html', 'parcours.html', 'etudiant.html', 'enseignant.html', 'installer.html', 'profil.html',
   'css/style.css', 'css/app.css',
   'js/theme.js', 'js/common.js', 'js/data.js', 'js/app.js', 'js/classe.js',
-  'sims/pendule.html', 'sims/titrage.html', 'sims/mendel.html', 'sims/ohm.html', 'sims/logique.html', 'sims/sir.html',
+  'sims/pendule.html', 'sims/titrage.html', 'sims/mendel.html', 'sims/ohm.html', 'sims/logique.html', 'sims/sir.html', 'sims/solaire.html',
   'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'
 ];

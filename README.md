@@ -26,7 +26,8 @@ LabVirtyel-Ayiti/
     ├── mendel.html     SVT : croisements de Mendel
     ├── ohm.html        Électronique : loi d'Ohm et LED
     ├── logique.html    Informatique : portes logiques
-    └── sir.html        Santé : épidémie (modèle SIR)
+    ├── sir.html        Santé : épidémie (modèle SIR)
+    └── solaire.html    Physique : panneau solaire et bilan d'énergie d'une maison
 ```
 
 ## Apparence et profil utilisateur

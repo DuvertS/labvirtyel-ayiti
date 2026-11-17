@@ -111,6 +111,37 @@ var LV_DATA = {
           answer: 1, explain: { fr: 'C\'est le croisement-test : s\'il apparaît des blancs, la plante était Aa.', ht: 'Se kwazman-tès la : si gen blan ki parèt, plant lan te Aa.' } }
       ] },
 
+    /* ---------------- PHYSIQUE · ÉNERGIE SOLAIRE ---------------- */
+    { id: 'art-solaire', type: 'article', domain: 'physique', level: 'initiation', audiences: ['universite', 'pro', 'public'], minutes: 6,
+      title: { fr: 'L\'énergie solaire en Haïti', ht: 'Enèji solè ann Ayiti' },
+      summary: { fr: 'Comment un panneau transforme la lumière en électricité.', ht: 'Kijan yon panno chanje limyè an kouran.' },
+      body: {
+        fr: '<p>Une <b>cellule photovoltaïque</b> est une fine plaque de silicium. Quand la lumière la frappe, elle met des électrons en mouvement : un courant apparaît. Un panneau courant assemble 36 ou 60 cellules en série pour obtenir une tension utile.</p><p>La puissance d\'un panneau est donnée en <b>watts crête (Wc)</b> : c\'est ce qu\'il fournit sous un soleil fort (1000 W/m²) à 25 °C. En réalité :</p><ul><li>moins de lumière (nuages, ombre, matin et soir) donne <b>moins de courant</b> ;</li><li>la chaleur fait baisser la <b>tension</b> : un panneau à 65 °C perd environ 15 % de sa puissance ;</li><li>la puissance dépend de la tension de travail : un régulateur <b>MPPT</b> trouve le meilleur point.</li></ul><p>Haïti reçoit en moyenne 5 à 6 heures de plein soleil par jour. Un panneau de 100 Wc produit donc environ <span class="formula">100 × 5,5 × 0,75 ≈ 410 Wh par jour</span>, de quoi éclairer une maison avec des ampoules LED et recharger plusieurs téléphones. Le soir, l\'énergie vient d\'une <b>batterie</b> chargée pendant la journée.</p>',
+        ht: '<p>Yon <b>selil fotovoltayik</b> se yon ti plak silisyòm fen. Lè limyè frape l, li fè elektwon yo deplase : sa bay kouran. Yon panno nòmal mete 36 oswa 60 selil youn dèyè lòt pou jwenn yon vòltaj ki itil.</p><p>Pisans yon panno bay an <b>wat pik (Wp)</b> : se sa li bay anba yon solèy fò (1000 W/m²) a 25 °C. An reyalite :</p><ul><li>mwens limyè (nwaj, lonbraj, maten ak aswè) bay <b>mwens kouran</b> ;</li><li>chalè fè <b>vòltaj</b> la bese : yon panno a 65 °C pèdi anviwon 15 % nan pisans li ;</li><li>pisans lan depann de vòltaj travay la : yon regilatè <b>MPPT</b> jwenn pi bon pwen an.</li></ul><p>Ayiti resevwa an mwayèn 5 a 6 èdtan bon solèy chak jou. Yon panno 100 Wp bay anviwon <span class="formula">100 × 5,5 × 0,75 ≈ 410 Wh pa jou</span>, sa ase pou klere yon kay ak anpoul LED epi chaje plizyè telefòn. Aswè, enèji a soti nan yon <b>batri</b> ki chaje pandan lajounen.</p>'
+      },
+      objectives: [{ fr: 'Expliquer l\'effet photovoltaïque', ht: 'Eksplike efè fotovoltayik la' }, { fr: 'Estimer la production d\'un panneau', ht: 'Estime konbyen yon panno pwodui' }] },
+    { id: 'sim-solaire', type: 'simulation', domain: 'physique', level: 'initiation', audiences: ['universite', 'pro', 'public'], minutes: 20, src: 'sims/solaire.html',
+      title: { fr: 'Panneau solaire', ht: 'Panno solè' },
+      summary: { fr: 'Soleil, chaleur, tension : produisez assez pour une maison.', ht: 'Solèy, chalè, vòltaj : pwodui ase pou yon kay.' },
+      objectives: [{ fr: 'Lire les courbes I-V et P-V', ht: 'Li koub I-V ak P-V yo' }, { fr: 'Trouver le point de puissance maximale', ht: 'Jwenn pwen pisans maksimòm lan' }, { fr: 'Dimensionner une petite installation', ht: 'Kalkile yon ti enstalasyon' }] },
+    { id: 'quiz-solaire', type: 'quiz', domain: 'physique', level: 'initiation', audiences: ['universite', 'pro', 'public'], minutes: 5,
+      title: { fr: 'Quiz : énergie solaire', ht: 'Quiz : enèji solè' },
+      summary: { fr: '4 questions sur les panneaux et le bilan d\'énergie.', ht: '4 kesyon sou panno ak bilan enèji.' },
+      questions: [
+        { q: { fr: 'Un nuage divise l\'ensoleillement par deux. Qu\'est-ce qui baisse surtout ?', ht: 'Yon nwaj fè fòs solèy la bese de fwa. Kisa ki bese plis ?' },
+          options: [{ fr: 'Le courant', ht: 'Kouran an' }, { fr: 'La tension', ht: 'Vòltaj la' }, { fr: 'Rien ne change', ht: 'Anyen pa chanje' }],
+          answer: 0, explain: { fr: 'Le courant est proportionnel à la lumière reçue ; la tension varie peu.', ht: 'Kouran an swiv kantite limyè a ; vòltaj la pa chanje anpil.' } },
+        { q: { fr: 'Quel est l\'effet de la chaleur sur un panneau ?', ht: 'Kisa chalè fè yon panno ?' },
+          options: [{ fr: 'Il produit plus', ht: 'Li pwodui plis' }, { fr: 'Sa tension et sa puissance baissent', ht: 'Vòltaj li ak pisans li bese' }, { fr: 'Il ne produit plus du tout', ht: 'Li pa pwodui ditou ankò' }],
+          answer: 1, explain: { fr: 'Environ −0,35 % de tension par degré au-dessus de 25 °C. Il faut aérer les panneaux.', ht: 'Anviwon −0,35 % vòltaj pou chak degre anlè 25 °C. Fòk van pase anba panno yo.' } },
+        { q: { fr: 'Deux panneaux de 100 Wc, 5 h de plein soleil, pertes de 25 %. Énergie par jour ?', ht: 'De panno 100 Wp, 5 èdtan bon solèy, 25 % pèt. Konbyen enèji pa jou ?' },
+          options: [{ fr: '1 000 Wh', ht: '1 000 Wh' }, { fr: '750 Wh', ht: '750 Wh' }, { fr: '500 Wh', ht: '500 Wh' }, { fr: '200 Wh', ht: '200 Wh' }],
+          answer: 1, explain: { fr: '2 × 100 × 5 × 0,75 = 750 Wh.', ht: '2 × 100 × 5 × 0,75 = 750 Wh.' } },
+        { q: { fr: 'À quoi sert un régulateur MPPT ?', ht: 'Pou kisa yon regilatè MPPT sèvi ?' },
+          options: [{ fr: 'À stocker l\'énergie la nuit', ht: 'Pou sere enèji pou lannwit' }, { fr: 'À faire travailler le panneau à sa puissance maximale', ht: 'Pou fè panno a travay nan pisans maksimòm li' }, { fr: 'À refroidir le panneau', ht: 'Pou fè panno a fre' }],
+          answer: 1, explain: { fr: 'Il ajuste la tension de travail pour rester au sommet de la courbe P-V.', ht: 'Li ajiste vòltaj travay la pou rete sou tèt koub P-V a.' } }
+      ] },
+
     /* ---------------- ÉLECTRONIQUE ---------------- */
     { id: 'art-ohm', type: 'article', domain: 'electronique', level: 'initiation', audiences: ['pro', 'public'], minutes: 5,
       title: { fr: 'Loi d\'Ohm et protection d\'une LED', ht: 'Lwa Ohm ak pwoteksyon yon LED' },
@@ -201,6 +232,10 @@ var LV_DATA = {
       title: { fr: 'Le temps et les oscillations', ht: 'Tan ak osilasyon' },
       summary: { fr: 'Du pendule à l\'horloge : comprendre et mesurer une période.', ht: 'Soti nan pandil rive nan revèy : konprann epi mezire yon peryòd.' },
       steps: ['art-pendule', 'sim-pendule', 'quiz-pendule'] },
+    { id: 'p-solaire', domain: 'physique', level: 'initiation', audiences: ['universite', 'pro', 'public'],
+      title: { fr: 'L\'électricité du soleil', ht: 'Kouran ki soti nan solèy' },
+      summary: { fr: 'Comprendre un panneau solaire et équiper une maison.', ht: 'Konprann yon panno solè epi ekipe yon kay.' },
+      steps: ['art-solaire', 'sim-solaire', 'quiz-solaire'] },
     { id: 'p-chimie', domain: 'chimie', level: 'intermediaire', audiences: ['universite', 'pro'],
       title: { fr: 'Contrôle qualité : doser un acide', ht: 'Kontwòl kalite : mezire yon asid' },
       summary: { fr: 'La technique du titrage, de la théorie au calcul de concentration.', ht: 'Teknik titraj la, soti nan teyori rive nan kalkil konsantrasyon.' },

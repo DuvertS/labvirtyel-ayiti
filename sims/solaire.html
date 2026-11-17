@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panneau solaire · LabVirtyèl</title>
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icons/favicon-32.png">
+<style>
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: .9rem; margin: 6px 0 12px; }
+  .legend i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .legend i.dot { width: 10px; height: 10px; border-radius: 50%; }
+  .plot-title { font-size: .85rem; color: var(--muted); margin: 4px 0 2px; }
+  .balance { height: 14px; background: var(--plot-grid); border-radius: 7px; overflow: hidden; margin: 6px 0 4px; }
+  .balance > div { height: 100%; background: var(--good); transition: width .2s; }
+  .balance.short > div { background: var(--red); }
+  .panel h3 { font-size: 1rem; margin: 18px 0 6px; }
+</style>
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="../index.html">LabVirtyèl <span>Ayiti</span></a>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+<main>
+  <a class="back" href="../index.html" data-fr="← Toutes les expériences" data-ht="← Tout eksperyans yo">← Toutes les expériences</a>
+  <h1 data-fr="Panneau solaire" data-ht="Panno solè">Panneau solaire</h1>
+  <p class="subtitle" data-fr="Physique · Énergie · Combien d'électricité un panneau produit-il, et peut-il alimenter une maison ?" data-ht="Fizik · Enèji · Konbyen kouran yon panno solè bay, e èske li ka bay yon kay limyè ?">Physique · Énergie · Combien d'électricité un panneau produit-il, et peut-il alimenter une maison ?</p>
+
+  <div class="lab">
+    <div class="panel">
+      <h2 data-fr="Le panneau (100 W)" data-ht="Panno a (100 W)">Le panneau (100 W)</h2>
+      <div class="control">
+        <label for="G"><span data-fr="Ensoleillement (W/m²)" data-ht="Fòs solèy la (W/m²)">Ensoleillement (W/m²)</span><output for="G"></output></label>
+        <input type="range" id="G" min="0" max="1100" step="50" value="1000">
+      </div>
+      <div class="control">
+        <label for="T"><span data-fr="Température du panneau (°C)" data-ht="Tanperati panno a (°C)">Température du panneau (°C)</span><output for="T"></output></label>
+        <input type="range" id="T" min="15" max="75" step="1" value="25">
+      </div>
+      <div class="control">
+        <label for="V"><span data-fr="Tension imposée par l'appareil (V)" data-ht="Vòltaj aparèy la mande (V)">Tension imposée par l'appareil (V)</span><output for="V"></output></label>
+        <input type="range" id="V" min="0" max="23" step="0.1" value="12">
+      </div>
+      <button class="btn" id="mppt" data-fr="Régler sur le point de puissance maximale" data-ht="Mete l sou pwen pisans maksimòm lan">Régler sur le point de puissance maximale</button>
+
+      <h3 data-fr="Ma maison" data-ht="Kay mwen">Ma maison</h3>
+      <div class="control">
+        <label for="n"><span data-fr="Nombre de panneaux" data-ht="Kantite panno">Nombre de panneaux</span><output for="n"></output></label>
+        <input type="range" id="n" min="1" max="6" step="1" value="2">
+      </div>
+      <div class="control">
+        <label for="h"><span data-fr="Heures de plein soleil par jour" data-ht="Konbyen èdtan bon solèy chak jou">Heures de plein soleil par jour</span><output for="h"></output></label>
+        <input type="range" id="h" min="2" max="7" step="0.5" value="5.5">
+      </div>
+      <div class="control">
+        <label for="lamps"><span data-fr="Ampoules LED 10 W, 5 h/soir" data-ht="Anpoul LED 10 W, 5 è chak swa">Ampoules LED 10 W, 5 h/soir</span><output for="lamps"></output></label>
+        <input type="range" id="lamps" min="0" max="10" step="1" value="4">
+      </div>
+      <div class="control">
+        <label for="phones"><span data-fr="Téléphones à recharger (15 Wh)" data-ht="Telefòn pou chaje (15 Wh)">Téléphones à recharger (15 Wh)</span><output for="phones"></output></label>
+        <input type="range" id="phones" min="0" max="8" step="1" value="3">
+      </div>
+      <div class="control">
+        <label for="fan"><span data-fr="Ventilateur 50 W (heures)" data-ht="Vantilatè 50 W (èdtan)">Ventilateur 50 W (heures)</span><output for="fan"></output></label>
+        <input type="range" id="fan" min="0" max="12" step="1" value="4">
+      </div>
+      <div class="control">
+        <label for="tv"><span data-fr="Télévision 60 W (heures)" data-ht="Televizyon 60 W (èdtan)">Télévision 60 W (heures)</span><output for="tv"></output></label>
+        <input type="range" id="tv" min="0" max="8" step="1" value="2">
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="plot-title" data-fr="Courant fourni selon la tension (caractéristique I-V)" data-ht="Kouran panno a bay dapre vòltaj la (koub I-V)">Courant fourni selon la tension (caractéristique I-V)</p>
+      <canvas id="cvI"></canvas>
+      <p class="plot-title" data-fr="Puissance fournie selon la tension (P = U × I)" data-ht="Pisans panno a bay dapre vòltaj la (P = U × I)">Puissance fournie selon la tension (P = U × I)</p>
+      <canvas id="cvP"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--d-physique)"></i><span data-fr="Courant" data-ht="Kouran">Courant</span></span>
+        <span><i style="background:var(--d-electronique)"></i><span data-fr="Puissance" data-ht="Pisans">Puissance</span></span>
+        <span><i class="dot" style="background:var(--red)"></i><span data-fr="Point de fonctionnement" data-ht="Pwen fonksyònman">Point de fonctionnement</span></span>
+        <span><i class="dot" style="background:var(--good)"></i><span data-fr="Puissance maximale" data-ht="Pisans maksimòm">Puissance maximale</span></span>
+      </div>
+      <div class="readouts">
+        <div class="readout"><div class="k" data-fr="Puissance au point choisi" data-ht="Pisans nan pwen ou chwazi a">Puissance au point choisi</div><div class="v" id="P">—</div></div>
+        <div class="readout"><div class="k" data-fr="Puissance maximale possible" data-ht="Pi gwo pisans posib">Puissance maximale possible</div><div class="v" id="Pm">—</div></div>
+        <div class="readout"><div class="k" data-fr="Tension à vide" data-ht="Vòltaj san chaj">Tension à vide</div><div class="v" id="Voc">—</div></div>
+        <div class="readout"><div class="k" data-fr="Rendement" data-ht="Randman">Rendement</div><div class="v" id="eff">—</div></div>
+      </div>
+      <div class="alert info" id="tip"></div>
+
+      <h3 data-fr="Bilan d'une journée" data-ht="Bilan yon jounen">Bilan d'une journée</h3>
+      <div class="readouts">
+        <div class="readout"><div class="k" data-fr="Énergie produite" data-ht="Enèji panno yo bay">Énergie produite</div><div class="v" id="Eprod">—</div></div>
+        <div class="readout"><div class="k" data-fr="Énergie consommée" data-ht="Enèji kay la itilize">Énergie consommée</div><div class="v" id="Econs">—</div></div>
+      </div>
+      <div class="balance" id="bal"><div></div></div>
+      <div class="alert" id="verdict"></div>
+    </div>
+  </div>
+
+  <div class="panel theory">
+    <h2 data-fr="Ce qu'il faut retenir" data-ht="Sa pou w retni">Ce qu'il faut retenir</h2>
+    <p data-fr="Un panneau ne fournit pas une puissance fixe : elle dépend de la tension à laquelle on le fait travailler. Il existe un seul point où le produit U × I est maximal. Les régulateurs « MPPT » cherchent ce point en permanence."
+       data-ht="Yon panno pa bay yon pisans fiks : sa depann de vòltaj yo fè l travay la. Gen yon sèl pwen kote U × I pi gwo. Regilatè « MPPT » yo toujou ap chèche pwen sa a.">Un panneau ne fournit pas une puissance fixe : elle dépend de la tension à laquelle on le fait travailler. Il existe un seul point où le produit U × I est maximal. Les régulateurs « MPPT » cherchent ce point en permanence.</p>
+    <p><span class="formula">E (Wh/jour) ≈ P<sub>crête</sub> × heures de plein soleil × 0,75</span></p>
+    <p data-fr="Le facteur 0,75 représente les pertes : chaleur, poussière, câbles, batterie et onduleur."
+       data-ht="Faktè 0,75 la reprezante pèt yo : chalè, pousyè, fil, batri ak envètè.">Le facteur 0,75 représente les pertes : chaleur, poussière, câbles, batterie et onduleur.</p>
+    <ul>
+      <li data-fr="Montez la température de 25 °C à 65 °C : que deviennent la tension à vide et la puissance maximale ? Pourquoi faut-il laisser l'air circuler sous un panneau ?" data-ht="Monte tanperati a soti 25 °C rive 65 °C : kisa ki rive vòltaj san chaj la ak pisans maksimòm lan ? Poukisa pou kite van pase anba yon panno ?">Montez la température de 25 °C à 65 °C : que deviennent la tension à vide et la puissance maximale ? Pourquoi faut-il laisser l'air circuler sous un panneau ?</li>
+      <li data-fr="Un panneau branché directement sur une batterie de 12 V travaille vers 12 V. Quelle part de sa puissance maximale perd-on ?" data-ht="Yon panno ki konekte dirèkteman sou yon batri 12 V travay vè 12 V. Ki pati nan pisans maksimòm li nou pèdi ?">Un panneau branché directement sur une batterie de 12 V travaille vers 12 V. Quelle part de sa puissance maximale perd-on ?</li>
+      <li data-fr="Combien de panneaux faut-il pour 6 ampoules, 4 téléphones et 6 heures de ventilateur ?" data-ht="Konbyen panno ou bezwen pou 6 anpoul, 4 telefòn ak 6 èdtan vantilatè ?">Combien de panneaux faut-il pour 6 ampoules, 4 téléphones et 6 heures de ventilateur ?</li>
+    </ul>
+    <p style="font-size:.85rem;color:var(--muted)" data-fr="Modèle simplifié à but pédagogique (panneau de 36 cellules, 100 W crête). Pour dimensionner une vraie installation, faites appel à un technicien."
+       data-ht="Modèl sa a senplifye pou aprantisaj (panno 36 selil, 100 W pik). Pou kalkile yon vrè enstalasyon, rele yon teknisyen.">Modèle simplifié à but pédagogique (panneau de 36 cellules, 100 W crête). Pour dimensionner une vraie installation, faites appel à un technicien.</p>
+  </div>
+</main>
+<script src="../js/common.js"></script>
+<script>
+(function () {
+  /* Panneau de 100 W crête (conditions standard : 1000 W/m², 25 °C), 36 cellules en série, surface 0,67 m². */
+  var ISC = 5.7, VOC = 22.0, VT = 1.2, AREA = 0.67, LOSSES = 0.75;
+  var W = 640, H = 220;
+  var G = 1000, T = 25, V = 12, n = 2, h = 5.5, lamps = 4, phones = 3, fan = 4, tv = 2;
+  var ctxI = LV.setupCanvas(document.getElementById('cvI'), W, H);
+  var ctxP = LV.setupCanvas(document.getElementById('cvP'), W, H);
+
+  /* Modèle à une diode simplifié : le courant baisse avec l'ombre, la tension baisse avec la chaleur. */
+  function params(g, t) {
+    var isc = ISC * g / 1000 * (1 + 0.0005 * (t - 25));
+    var voc = g <= 0 ? 0 : Math.max(0, VOC * (1 - 0.0035 * (t - 25)) + VT * Math.log(g / 1000));
+    return { isc: isc, voc: voc };
+  }
+  function current(p, v) {
+    if (p.isc <= 0 || v >= p.voc) return 0;
+    return Math.max(0, p.isc * (1 - Math.exp((v - p.voc) / VT)) / (1 - Math.exp(-p.voc / VT)));
+  }
+  function mpp(p) {
+    var best = { v: 0, i: 0, p: 0 };
+    for (var v = 0; v <= p.voc; v += 0.01) {
+      var i = current(p, v);
+      if (v * i > best.p) best = { v: v, i: i, p: v * i };
+    }
+    return best;
+  }
+  /* Puissance crête réelle du modèle aux conditions standard (sert au bilan journalier). */
+  var PSTC = mpp(params(1000, 25)).p;
+
+  function dot(ctx, map, x, y, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(map.X(x), map.Y(y), 6, 0, 2 * Math.PI); ctx.fill();
+  }
+
+  function render() {
+    var p = params(G, T), m = mpp(p);
+    var iv = [], pv = [];
+    for (var v = 0; v <= 24; v += 0.1) { var i = current(p, v); iv.push([v, i]); pv.push([v, v * i]); }
+    var i0 = current(p, V), p0 = V * i0;
+    var xl = LV.t('Tension (V)', 'Vòltaj (V)');
+
+    var mI = LV.plot(ctxI, W, H, { xmin: 0, xmax: 24, ymin: 0, ymax: 7, xticks: 6, yticks: 7, xlabel: xl,
+      yfmt: function (y) { return y.toFixed(0) + ' A'; },
+      series: [{ points: iv, color: LV.css('--d-physique'), width: 3 }] });
+    dot(ctxI, mI, m.v, m.i, LV.css('--good'));
+    dot(ctxI, mI, V, i0, LV.css('--red'));
+
+    var mP = LV.plot(ctxP, W, H, { xmin: 0, xmax: 24, ymin: 0, ymax: 120, xticks: 6, yticks: 6, xlabel: xl,
+      yfmt: function (y) { return y.toFixed(0) + ' W'; },
+      series: [{ points: pv, color: LV.css('--d-electronique'), width: 3 }] });
+    dot(ctxP, mP, m.v, m.p, LV.css('--good'));
+    dot(ctxP, mP, V, p0, LV.css('--red'));
+
+    var f1 = function (x) { return x.toFixed(1).replace('.', ','); };
+    document.getElementById('P').textContent = f1(p0) + ' W';
+    document.getElementById('Pm').textContent = f1(m.p) + ' W (' + f1(m.v) + ' V)';
+    document.getElementById('Voc').textContent = f1(p.voc) + ' V';
+    document.getElementById('eff').textContent = G > 0 ? f1(m.p / (G * AREA) * 100) + ' %' : '—';
+
+    var tip = document.getElementById('tip');
+    tip.classList.add('show');
+    var ratio = m.p > 0 ? p0 / m.p : 0;
+    tip.textContent = G === 0
+      ? LV.t('Pas de lumière, pas de courant : la nuit, il faut une batterie.', 'Pa gen limyè, pa gen kouran : lannwit, ou bezwen yon batri.')
+      : ratio > 0.97
+        ? LV.t('Vous êtes au point de puissance maximale.', 'Ou sou pwen pisans maksimòm lan.')
+        : LV.t('Vous récupérez ', 'W ap pran ') + Math.round(ratio * 100) + LV.t(' % de la puissance possible. Déplacez la tension vers ', ' % nan pisans posib la. Deplase vòltaj la vè ') + f1(m.v) + ' V.';
+
+    /* Bilan d'une journée */
+    var eProd = n * PSTC * h * LOSSES;
+    var eCons = lamps * 10 * 5 + phones * 15 + fan * 50 + tv * 60;
+    document.getElementById('Eprod').textContent = Math.round(eProd) + ' Wh';
+    document.getElementById('Econs').textContent = Math.round(eCons) + ' Wh';
+    var cover = eCons > 0 ? eProd / eCons : 1;
+    var bal = document.getElementById('bal');
+    bal.firstElementChild.style.width = Math.min(100, cover * 100) + '%';
+    bal.classList.toggle('short', cover < 1);
+    var verdict = document.getElementById('verdict');
+    verdict.classList.add('show');
+    verdict.classList.toggle('danger', cover < 1);
+    verdict.classList.toggle('info', cover >= 1);
+    if (cover >= 1) {
+      verdict.textContent = LV.t('Les panneaux couvrent les besoins (', 'Panno yo kouvri bezwen yo (') + Math.round(cover * 100) +
+        LV.t(' %). L\'énergie du soir doit être stockée dans une batterie pendant la journée.', ' %). Fòk enèji pou aswè a sere nan yon batri pandan lajounen.');
+    } else {
+      var need = Math.ceil(eCons / (PSTC * h * LOSSES));
+      verdict.textContent = LV.t('Production insuffisante : ', 'Pa ase pwodiksyon : ') + Math.round(cover * 100) +
+        LV.t(' % des besoins. Il faudrait au moins ', ' % nan bezwen yo. Ou ta bezwen omwen ') + need + LV.t(' panneaux, ou moins de consommation.', ' panno, oswa konsome mwens.');
+    }
+  }
+
+  LV.bindRange('G', function (v) { return v; }, function (v) { G = v; render(); });
+  LV.bindRange('T', function (v) { return v + ' °C'; }, function (v) { T = v; render(); });
+  var vInput = LV.bindRange('V', function (v) { return v.toFixed(1); }, function (v) { V = v; render(); });
+  LV.bindRange('n', function (v) { return v; }, function (v) { n = v; render(); });
+  LV.bindRange('h', function (v) { return v.toFixed(1).replace('.', ','); }, function (v) { h = v; render(); });
+  LV.bindRange('lamps', function (v) { return v; }, function (v) { lamps = v; render(); });
+  LV.bindRange('phones', function (v) { return v; }, function (v) { phones = v; render(); });
+  LV.bindRange('fan', function (v) { return v + ' h'; }, function (v) { fan = v; render(); });
+  LV.bindRange('tv', function (v) { return v + ' h'; }, function (v) { tv = v; render(); });
+  document.getElementById('mppt').addEventListener('click', function () {
+    vInput.value = mpp(params(G, T)).v.toFixed(1);
+    vInput.dispatchEvent(new Event('input'));
+  });
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>
