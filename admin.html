@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administration · LabVirtyèl Ayiti</title>
+<script src="js/theme.js"></script>
+<script src="js/gate.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="author" content="DUVTECH">
+<meta name="theme-color" content="#1f3a5f">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
+  <nav>
+    <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="simulations.html" data-fr="Simulations" data-ht="Simulasyon">Simulations</a>
+    <a href="bibliotheque.html" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
+    <a href="bibliotheque.html?tab=parcours" data-fr="Parcours" data-ht="Pakou">Parcours</a>
+    <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
+    <a href="enseignant.html" data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</a>
+  </nav>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+
+<main>
+  <div class="section-head" style="margin-top:0">
+    <h1 style="margin:0" data-fr="Administration" data-ht="Administrasyon">Administration</h1>
+    <button class="btn" id="reload" data-fr="Actualiser" data-ht="Rafrechi">Actualiser</button>
+  </div>
+  <p class="subtitle" id="asof"></p>
+  <div id="page"><div class="empty" data-fr="Chargement…" data-ht="Ap chaje…">Chargement…</div></div>
+</main>
+
+<footer class="site">
+  <span data-fr="Accès réservé aux administrateurs. Chaque action est vérifiée par le serveur." data-ht="Se pou administratè sèlman. Sèvè a verifye chak aksyon.">Accès réservé aux administrateurs. Chaque action est vérifiée par le serveur.</span>
+  <span class="org" data-fr="Un projet DUVTECH · © 2026 DUVTECH" data-ht="Yon pwojè DUVTECH · © 2026 DUVTECH">Un projet DUVTECH · © 2026 DUVTECH</span>
+</footer>
+<script src="js/vendor/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/community.js"></script>
+<script>
+(function () {
+  var D = APP.D, esc = APP.esc, sb = AUTH.client;
+  var page = document.getElementById('page');
+  var me = null, people = [], prog = [], res = [], tab = 'participants', loadedAt = null, error = null;
+  var f = { q: '', role: '', status: '' };
+  var PT = { eleve: ['Élève', 'Elèv'], etudiant: ['Étudiant', 'Etidyan'], enseignant: ['Enseignant', 'Pwofesè'], formateur: ['Formateur', 'Fòmatè'], public: ['Grand public', 'Piblik'] };
+  var ROLE = { apprenant: ['Apprenant', 'Aprann'], enseignant: ['Enseignant', 'Pwofesè'], admin: ['Administrateur', 'Administratè'] };
+  function t2(a) { return LV.t(a[0], a[1]); }
+  var DAY = 86400000;
+
+  async function load() {
+    error = null;
+    var a = await Promise.all([
+      sb.from('profiles').select('*').order('created_at', { ascending: false }),
+      sb.from('progress').select('user_id,resource_id,score,total,done_at'),
+      sb.from('community_resources').select('*').order('created_at', { ascending: false })
+    ]);
+    var bad = a.filter(function (x) { return x.error; })[0];
+    if (bad) { error = bad.error.message; return; }
+    people = a[0].data; prog = a[1].data; res = a[2].data; loadedAt = new Date();
+  }
+
+  function stats(uid) {
+    var rows = prog.filter(function (x) { return x.user_id === uid; });
+    var q = rows.filter(function (x) { return x.total; });
+    var avg = q.length ? Math.round(q.reduce(function (s, x) { return s + x.score / x.total; }, 0) / q.length * 100) : null;
+    return { done: rows.length, avg: avg };
+  }
+
+  function kpis() {
+    var now = Date.now();
+    var active7 = people.filter(function (p) { return p.last_seen && now - Date.parse(p.last_seen) < 7 * DAY; }).length;
+    var list = [
+      [people.length, LV.t('Participants inscrits', 'Patisipan enskri')],
+      [people.filter(function (p) { return p.email_confirmed_at; }).length, LV.t('Comptes confirmés', 'Kont konfime')],
+      [active7, LV.t('Actifs sur 7 jours', 'Aktif nan 7 jou')],
+      [people.filter(function (p) { return p.role === 'enseignant'; }).length, LV.t('Enseignants validés', 'Pwofesè valide')],
+      [people.filter(function (p) { return p.teacher_status === 'en_attente'; }).length, LV.t('Demandes enseignant', 'Demann pwofesè'), 'demandes'],
+      [res.filter(function (r) { return r.status === 'en_attente'; }).length, LV.t('Ressources à valider', 'Resous pou valide'), 'validation']
+    ];
+    return '<div class="kpis admin-kpis">' + list.map(function (k) {
+      return '<div class="kpi' + (k[2] && k[0] ? ' alert-kpi' : '') + '"' + (k[2] ? ' data-go="' + k[2] + '"' : '') + '><b>' + k[0] + '</b><span>' + k[1] + '</span></div>';
+    }).join('') + '</div>';
+  }
+
+  /* Inscriptions par semaine (8 dernières semaines) */
+  function chart() {
+    var weeks = [], now = new Date(); now.setHours(0, 0, 0, 0);
+    var start = new Date(now.getTime() - ((now.getDay() + 6) % 7) * DAY);
+    for (var i = 7; i >= 0; i--) {
+      var a = start.getTime() - i * 7 * DAY, b = a + 7 * DAY;
+      weeks.push({ a: a, n: people.filter(function (p) { var t = Date.parse(p.created_at); return t >= a && t < b; }).length });
+    }
+    var max = Math.max(1, Math.max.apply(null, weeks.map(function (w) { return w.n; })));
+    return '<div class="panel"><h2>' + LV.t('Inscriptions par semaine', 'Enskripsyon pa semèn') + '</h2><div class="bars">' + weeks.map(function (w) {
+      return '<div class="bar"><span class="v">' + w.n + '</span><i style="height:' + Math.round(w.n / max * 100) + '%"></i><small>' +
+        new Date(w.a).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + '</small></div>';
+    }).join('') + '</div></div>';
+  }
+
+  function tabs() {
+    var nReq = people.filter(function (p) { return p.teacher_status === 'en_attente'; }).length;
+    var nVal = res.filter(function (r) { return r.status === 'en_attente'; }).length;
+    var list = [['participants', LV.t('Participants', 'Patisipan')], ['demandes', LV.t('Demandes enseignant', 'Demann pwofesè') + (nReq ? ' (' + nReq + ')' : '')],
+      ['validation', LV.t('Ressources à valider', 'Resous pou valide') + (nVal ? ' (' + nVal + ')' : '')], ['ressources', LV.t('Toutes les ressources', 'Tout resous yo')]];
+    return '<div class="tabs admin-tabs">' + list.map(function (x) { return '<button data-tab="' + x[0] + '" class="' + (tab === x[0] ? 'active' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  }
+
+  function participants() {
+    var q = f.q.toLowerCase();
+    var rows = people.filter(function (p) {
+      return (!q || (p.full_name + ' ' + p.email + ' ' + p.school).toLowerCase().indexOf(q) >= 0) &&
+        (!f.role || p.role === f.role) && (!f.status || p.status === f.status);
+    });
+    return '<div class="panel"><div class="lib-top">' +
+      '<input type="search" id="fq" placeholder="' + esc(LV.t('Nom, e-mail ou établissement…', 'Non, imèl oswa lekòl…')) + '" value="' + esc(f.q) + '">' +
+      '<select id="frole"><option value="">' + LV.t('Tous les rôles', 'Tout wòl yo') + '</option>' + Object.keys(ROLE).map(function (k) { return '<option value="' + k + '"' + (f.role === k ? ' selected' : '') + '>' + t2(ROLE[k]) + '</option>'; }).join('') + '</select>' +
+      '<select id="fstatus"><option value="">' + LV.t('Tous les statuts', 'Tout estati yo') + '</option><option value="actif"' + (f.status === 'actif' ? ' selected' : '') + '>' + LV.t('Actif', 'Aktif') + '</option><option value="suspendu"' + (f.status === 'suspendu' ? ' selected' : '') + '>' + LV.t('Suspendu', 'Sispann') + '</option></select>' +
+      '<button class="btn" id="csv">' + LV.t('Exporter (CSV)', 'Ekspòte (CSV)') + '</button></div>' +
+      '<div class="count">' + rows.length + ' ' + LV.t('participant(s)', 'patisipan') + '</div>' +
+      '<div class="table-wrap"><table class="matrix admin-table"><thead><tr>' +
+      [LV.t('Participant', 'Patisipan'), LV.t('Profil', 'Pwofil'), LV.t('Rôle', 'Wòl'), LV.t('Statut', 'Estati'), LV.t('Inscription', 'Enskripsyon'),
+       LV.t('Dernière activité', 'Dènye aktivite'), LV.t('Terminées', 'Fini'), LV.t('Quiz', 'Quiz')].map(function (h) { return '<th>' + h + '</th>'; }).join('') +
+      '</tr></thead><tbody>' + rows.map(function (p) {
+        var s = stats(p.id), self = p.id === me.id;
+        return '<tr data-id="' + p.id + '"><td><b>' + esc(p.full_name || '—') + '</b><small>' + esc(p.email) + (p.school ? ' · ' + esc(p.school) : '') + '</small>' +
+          (p.email_confirmed_at ? '' : '<small class="st warn">' + LV.t('E-mail non confirmé', 'Imèl pa konfime') + '</small>') + '</td>' +
+          '<td>' + t2(PT[p.profile_type] || PT.public) + '</td>' +
+          '<td><select data-role' + (self ? ' disabled title="' + esc(LV.t('Vous ne pouvez pas changer votre propre rôle', 'Ou pa ka chanje pwòp wòl ou')) + '"' : '') + '>' + Object.keys(ROLE).map(function (k) {
+            return '<option value="' + k + '"' + (p.role === k ? ' selected' : '') + '>' + t2(ROLE[k]) + '</option>'; }).join('') + '</select></td>' +
+          '<td><span class="st ' + (p.status === 'actif' ? 'good' : 'bad') + '">' + (p.status === 'actif' ? LV.t('Actif', 'Aktif') : LV.t('Suspendu', 'Sispann')) + '</span>' +
+          (self ? '' : '<button class="btn small" data-toggle>' + (p.status === 'actif' ? LV.t('Suspendre', 'Sispann') : LV.t('Réactiver', 'Reaktive')) + '</button>') + '</td>' +
+          '<td>' + COMM.date(p.created_at) + '</td><td>' + COMM.date(p.last_seen) + '</td>' +
+          '<td>' + s.done + '</td><td>' + (s.avg == null ? '—' : s.avg + ' %') + '</td></tr>';
+      }).join('') + '</tbody></table></div></div>';
+  }
+
+  function demandes() {
+    var rows = people.filter(function (p) { return p.teacher_status === 'en_attente'; });
+    return '<div class="panel">' + (rows.length ? '<div class="cres-list">' + rows.map(function (p) {
+      return '<article class="cres" data-id="' + p.id + '"><h3>' + esc(p.full_name || '—') + '</h3><p class="muted">' + esc(p.email) + ' · ' + t2(PT[p.profile_type] || PT.public) +
+        (p.school ? ' · ' + esc(p.school) : '') + '</p><p class="by">' + LV.t('Inscrit le ', 'Enskri ') + COMM.date(p.created_at) +
+        (p.email_confirmed_at ? '' : ' · <span class="st warn">' + LV.t('E-mail non confirmé', 'Imèl pa konfime') + '</span>') + '</p>' +
+        '<div class="btn-row"><button class="btn primary" data-approve>' + LV.t('Valider comme enseignant', 'Valide kòm pwofesè') + '</button>' +
+        '<button class="btn" data-refuse>' + LV.t('Refuser', 'Refize') + '</button></div></article>';
+    }).join('') + '</div>' : '<div class="empty">' + LV.t('Aucune demande en attente.', 'Pa gen demann k ap tann.') + '</div>') + '</div>';
+  }
+
+  function resources(onlyPending) {
+    var rows = res.filter(function (r) { return !onlyPending || r.status === 'en_attente'; });
+    return '<div class="panel">' + (rows.length ? '<div class="cres-list">' + rows.map(function (r) {
+      var acts = (r.status !== 'publie' ? '<button class="btn primary" data-publish>' + LV.t('Publier', 'Pibliye') + '</button>' : '<button class="btn" data-unpublish>' + LV.t('Retirer', 'Retire') + '</button>') +
+        (r.status !== 'refuse' ? '<button class="btn" data-reject>' + LV.t('Refuser', 'Refize') + '</button>' : '') +
+        '<button class="btn danger" data-delete>' + LV.t('Supprimer', 'Efase') + '</button>' +
+        '<input class="note-in" maxlength="500" placeholder="' + esc(LV.t('Motif du refus (visible par l\'auteur)', 'Rezon refi a (otè a ap wè l)')) + '">';
+      return COMM.card(r, { status: true, author: r.author_name, actions: acts });
+    }).join('') + '</div>' : '<div class="empty">' + (onlyPending ? LV.t('Rien à valider pour le moment.', 'Pa gen anyen pou valide kounye a.') : LV.t('Aucune ressource.', 'Pa gen resous.')) + '</div>') + '</div>';
+  }
+
+  function render() {
+    if (error) { page.innerHTML = '<div class="empty">' + LV.t('Erreur de chargement : ', 'Erè chajman : ') + esc(error) + '</div>'; return; }
+    if (!me) return;
+    document.getElementById('asof').textContent = loadedAt ? LV.t('Données du ', 'Done ') + loadedAt.toLocaleString('fr-FR') : '';
+    var body = tab === 'participants' ? participants() : tab === 'demandes' ? demandes() : tab === 'validation' ? resources(true) : resources(false);
+    page.innerHTML = kpis() + chart() + tabs() + body;
+    bind();
+  }
+
+  async function act(promise, btn) {
+    if (btn) btn.disabled = true;
+    var r = await promise;
+    if (r.error) { alertBox(r.error.message); if (btn) btn.disabled = false; return false; }
+    await load(); render(); return true;
+  }
+  function alertBox(m) {
+    var d = document.createElement('div'); d.className = 'alert danger show'; d.textContent = LV.t('Action refusée : ', 'Aksyon refize : ') + m;
+    page.prepend(d);
+  }
+
+  function bind() {
+    page.querySelectorAll('[data-go]').forEach(function (k) { k.addEventListener('click', function () { tab = k.getAttribute('data-go'); render(); }); });
+    page.querySelectorAll('.admin-tabs button').forEach(function (b) { b.addEventListener('click', function () { tab = b.getAttribute('data-tab'); render(); }); });
+    var fq = document.getElementById('fq');
+    if (fq) {
+      fq.addEventListener('input', function () { f.q = fq.value; var pos = fq.selectionStart; render(); var n = document.getElementById('fq'); n.focus(); n.setSelectionRange(pos, pos); });
+      document.getElementById('frole').addEventListener('change', function (e) { f.role = e.target.value; render(); });
+      document.getElementById('fstatus').addEventListener('change', function (e) { f.status = e.target.value; render(); });
+      document.getElementById('csv').addEventListener('click', csv);
+    }
+    page.querySelectorAll('tr[data-id]').forEach(function (tr) {
+      var id = tr.getAttribute('data-id'), p = people.filter(function (x) { return x.id === id; })[0];
+      var sel = tr.querySelector('[data-role]');
+      sel.addEventListener('change', function () {
+        var role = sel.value, upd = { role: role };
+        if (role !== 'apprenant') upd.teacher_status = 'approuve';
+        act(sb.from('profiles').update(upd).eq('id', id), sel);
+      });
+      var tg = tr.querySelector('[data-toggle]');
+      if (tg) tg.addEventListener('click', function () {
+        if (p.status === 'actif' && tg.getAttribute('data-sure') !== '1') { tg.setAttribute('data-sure', '1'); tg.textContent = LV.t('Confirmer', 'Konfime'); return; }
+        act(sb.from('profiles').update({ status: p.status === 'actif' ? 'suspendu' : 'actif' }).eq('id', id), tg);
+      });
+    });
+    page.querySelectorAll('[data-approve], [data-refuse]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.closest('[data-id]').getAttribute('data-id');
+        var upd = b.hasAttribute('data-approve') ? { role: 'enseignant', teacher_status: 'approuve' } : { teacher_status: 'refuse' };
+        act(sb.from('profiles').update(upd).eq('id', id), b);
+      });
+    });
+    page.querySelectorAll('.cres[data-id]').forEach(function (el) {
+      var r = res.filter(function (x) { return x.id === el.getAttribute('data-id'); })[0];
+      if (!r) return;
+      el.querySelector('[data-open]').addEventListener('click', function () { COMM.open(r, el); });
+      var note = function () { var n = el.querySelector('.note-in'); return n ? n.value.trim() : ''; };
+      var on = function (sel, fn) { var b = el.querySelector(sel); if (b) b.addEventListener('click', function () { fn(b); }); };
+      on('[data-publish]', function (b) { act(sb.from('community_resources').update({ status: 'publie', review_note: '' }).eq('id', r.id), b); });
+      on('[data-unpublish]', function (b) { act(sb.from('community_resources').update({ status: 'en_attente' }).eq('id', r.id), b); });
+      on('[data-reject]', function (b) {
+        if (!note()) { el.querySelector('.note-in').focus(); el.querySelector('.note-in').classList.add('need'); return; }
+        act(sb.from('community_resources').update({ status: 'refuse', review_note: note() }).eq('id', r.id), b);
+      });
+      on('[data-delete]', async function (b) {
+        if (b.getAttribute('data-sure') !== '1') { b.setAttribute('data-sure', '1'); b.textContent = LV.t('Confirmer la suppression', 'Konfime efase'); return; }
+        if (r.file_path) await sb.storage.from('ressources').remove([r.file_path]);
+        act(sb.from('community_resources').delete().eq('id', r.id), b);
+      });
+    });
+  }
+
+  function csv() {
+    var head = ['Nom', 'E-mail', 'Établissement', 'Profil', 'Rôle', 'Statut', 'E-mail confirmé', 'Inscription', 'Dernière activité', 'Ressources terminées', 'Moyenne quiz (%)'];
+    var cell = function (v) { v = v == null ? '' : String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+    var lines = [head.map(cell).join(';')].concat(people.map(function (p) {
+      var s = stats(p.id);
+      return [p.full_name, p.email, p.school, (PT[p.profile_type] || PT.public)[0], ROLE[p.role][0], p.status, p.email_confirmed_at ? 'oui' : 'non',
+        (p.created_at || '').slice(0, 10), (p.last_seen || '').slice(0, 10), s.done, s.avg == null ? '' : s.avg].map(cell).join(';');
+    }));
+    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'participants-labvirtyel-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  document.getElementById('reload').addEventListener('click', async function () { await load(); render(); });
+  LV.onLang(render);
+  AUTH.ready.then(async function (p) {
+    if (!AUTH.isAdmin(p)) {
+      page.innerHTML = '<div class="empty">' + LV.t('Cette page est réservée aux administrateurs.', 'Paj sa a se pou administratè sèlman.') + ' <a href="index.html">' + LV.t('Retour à l\'accueil', 'Retounen nan akèy') + '</a></div>';
+      return;
+    }
+    me = p; await load(); render();
+  });
+})();
+</script>
+</body>
+</html>

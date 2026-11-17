@@ -16,7 +16,10 @@ var APP = (function () {
   /* ---------- Progression (stockée dans ce navigateur uniquement) ---------- */
   var KEY = 'lv-progress';
   function load() { try { return JSON.parse(localStorage.getItem(KEY)) || { done: {}, quiz: {} }; } catch (e) { return { done: {}, quiz: {} }; } }
-  function save(s) { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* stockage indisponible */ } }
+  function save(s) {
+    try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* stockage indisponible */ }
+    if (window.AUTH) AUTH.syncSoon();   /* envoie aussi la progression au compte du participant */
+  }
   function isDone(id) { return !!load().done[id]; }
   function markDone(id) { var s = load(); s.done[id] = Date.now(); save(s); }
   function setQuizScore(id, score, total) { var s = load(); s.quiz[id] = { score: score, total: total }; s.done[id] = Date.now(); save(s); }

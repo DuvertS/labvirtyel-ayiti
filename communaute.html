@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Communauté · LabVirtyèl Ayiti</title>
+<script src="js/theme.js"></script>
+<script src="js/gate.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="author" content="DUVTECH">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
+  <nav>
+    <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="simulations.html" data-fr="Simulations" data-ht="Simulasyon">Simulations</a>
+    <a href="bibliotheque.html" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
+    <a href="bibliotheque.html?tab=parcours" data-fr="Parcours" data-ht="Pakou">Parcours</a>
+    <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
+    <a href="enseignant.html" data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</a>
+  </nav>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+
+<main>
+  <h1 data-fr="Ressources de la communauté" data-ht="Resous kominote a">Ressources de la communauté</h1>
+  <p class="subtitle" data-fr="Articles, documents et liens proposés par des enseignants haïtiens, vérifiés par l'équipe avant publication." data-ht="Atik, dokiman ak lyen pwofesè ayisyen pwopoze, ekip la verifye yo anvan yo pibliye.">Articles, documents et liens proposés par des enseignants haïtiens, vérifiés par l'équipe avant publication.</p>
+  <div class="lib-top">
+    <input type="search" id="search" aria-label="Rechercher">
+    <select id="dom" aria-label="Domaine"></select>
+    <a class="btn" id="add" href="contribuer.html" hidden data-fr="Proposer une ressource" data-ht="Pwopoze yon resous">Proposer une ressource</a>
+  </div>
+  <div class="count" id="count"></div>
+  <div class="cres-list" id="list"><div class="empty" data-fr="Chargement…" data-ht="Ap chaje…">Chargement…</div></div>
+</main>
+
+<footer class="site">
+  <span data-fr="LabVirtyèl Ayiti · prototype · usage pédagogique uniquement" data-ht="LabVirtyèl Ayiti · pwototip · pou aprantisaj sèlman">LabVirtyèl Ayiti · prototype · usage pédagogique uniquement</span>
+  <span class="org" data-fr="Un projet DUVTECH · © 2026 DUVTECH" data-ht="Yon pwojè DUVTECH · © 2026 DUVTECH">Un projet DUVTECH · © 2026 DUVTECH</span>
+</footer>
+<script src="js/vendor/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/community.js"></script>
+<script>
+(function () {
+  var D = APP.D, rows = null, failed = false;
+  var search = document.getElementById('search'), dom = document.getElementById('dom');
+
+  function norm(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function render() {
+    search.placeholder = LV.t('Rechercher…', 'Chèche…');
+    var cur = dom.value;
+    dom.innerHTML = '<option value="">' + LV.t('Tous les domaines', 'Tout domèn yo') + '</option>' + Object.keys(D.domains).map(function (k) {
+      return '<option value="' + k + '"' + (cur === k ? ' selected' : '') + '>' + APP.esc(APP.L(D.domains[k])) + '</option>';
+    }).join('');
+    var list = document.getElementById('list');
+    if (failed) { list.innerHTML = '<div class="empty">' + LV.t('Impossible de charger les ressources. Vérifiez votre connexion Internet.', 'Nou pa ka chaje resous yo. Tcheke koneksyon entènèt ou.') + '</div>'; return; }
+    if (!rows) return;
+    var q = norm(search.value.trim());
+    var items = rows.filter(function (r) {
+      return (!dom.value || r.domain === dom.value) &&
+        (!q || norm([r.title_fr, r.title_ht, r.summary_fr, r.summary_ht, r.author_name].join(' ')).indexOf(q) >= 0);
+    });
+    document.getElementById('count').textContent = items.length + ' ' + LV.t('ressource(s)', 'resous');
+    list.innerHTML = items.map(function (r) { return COMM.card(r, { author: r.author_name }); }).join('') ||
+      '<div class="empty">' + LV.t('Aucune ressource publiée pour le moment.', 'Poko gen resous ki pibliye.') + '</div>';
+    list.querySelectorAll('[data-open]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var el = b.closest('.cres'), r = rows.filter(function (x) { return x.id === el.getAttribute('data-id'); })[0];
+        COMM.open(r, el);
+      });
+    });
+  }
+  search.addEventListener('input', render);
+  dom.addEventListener('change', render);
+  LV.onLang(render);
+
+  AUTH.ready.then(async function (p) {
+    if (AUTH.isTeacher(p)) document.getElementById('add').hidden = false;
+    var r = await AUTH.client.from('community_resources').select('*').eq('status', 'publie').order('created_at', { ascending: false });
+    if (r.error) { failed = true; } else { rows = r.data; }
+    render();
+  });
+})();
+</script>
+</body>
+</html>

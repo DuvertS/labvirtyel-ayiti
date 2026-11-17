@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mes ressources · LabVirtyèl Ayiti</title>
+<script src="js/theme.js"></script>
+<script src="js/gate.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="author" content="DUVTECH">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
+  <nav>
+    <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="simulations.html" data-fr="Simulations" data-ht="Simulasyon">Simulations</a>
+    <a href="bibliotheque.html" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
+    <a href="bibliotheque.html?tab=parcours" data-fr="Parcours" data-ht="Pakou">Parcours</a>
+    <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
+    <a href="enseignant.html" data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</a>
+  </nav>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+
+<main>
+  <h1 data-fr="Mes ressources" data-ht="Resous mwen">Mes ressources</h1>
+  <p class="subtitle" data-fr="Proposez un article, un document ou un lien. Il sera vérifié par un administrateur avant d'être visible par les participants." data-ht="Pwopoze yon atik, yon dokiman oswa yon lyen. Yon administratè ap verifye l anvan patisipan yo ka wè l.">Proposez un article, un document ou un lien. Il sera vérifié par un administrateur avant d'être visible par les participants.</p>
+  <div id="page"><div class="empty" data-fr="Chargement…" data-ht="Ap chaje…">Chargement…</div></div>
+</main>
+
+<footer class="site">
+  <span data-fr="Fichiers acceptés : PDF, PNG, JPEG, WebP · 10 Mo maximum · stockage privé" data-ht="Fichye nou aksepte : PDF, PNG, JPEG, WebP · 10 Mo maksimòm · estokaj prive">Fichiers acceptés : PDF, PNG, JPEG, WebP · 10 Mo maximum · stockage privé</span>
+  <span class="org" data-fr="Un projet DUVTECH · © 2026 DUVTECH" data-ht="Yon pwojè DUVTECH · © 2026 DUVTECH">Un projet DUVTECH · © 2026 DUVTECH</span>
+</footer>
+<script src="js/vendor/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/common.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/community.js"></script>
+<script>
+(function () {
+  var D = APP.D, esc = APP.esc, sb = AUTH.client;
+  var page = document.getElementById('page');
+  var me = null, mine = [], editing = null, notice = null, draftKind = 'article';
+  var MAX = 10 * 1024 * 1024;
+  var TYPES = { 'application/pdf': '.pdf', 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp' };
+
+  /* Vérifie la signature réelle du fichier (pas seulement son extension) */
+  function sniff(file) {
+    return file.slice(0, 12).arrayBuffer().then(function (buf) {
+      var b = new Uint8Array(buf), hex = Array.prototype.map.call(b, function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+      if (hex.indexOf('25504446') === 0) return 'application/pdf';
+      if (hex.indexOf('89504e47') === 0) return 'image/png';
+      if (hex.indexOf('ffd8ff') === 0) return 'image/jpeg';
+      if (hex.indexOf('52494646') === 0 && hex.slice(16, 24) === '57454250') return 'image/webp';
+      return null;
+    });
+  }
+
+  function opt(dict, cur) {
+    return Object.keys(dict).map(function (k) { return '<option value="' + k + '"' + (cur === k ? ' selected' : '') + '>' + esc(APP.L(dict[k])) + '</option>'; }).join('');
+  }
+
+  function formHtml() {
+    var r = editing || {};
+    var k = r.kind || draftKind;
+    var aud = r.audiences || ['ecole', 'universite'];
+    return '<form class="panel contrib" id="form">' +
+      '<h2>' + (editing ? LV.t('Modifier la ressource', 'Modifye resous la') : LV.t('Nouvelle ressource', 'Nouvo resous')) + '</h2>' +
+      (notice ? '<div class="alert ' + notice.kind + ' show" role="status">' + notice.text + '</div>' : '') +
+      '<fieldset class="fld"><legend>' + LV.t('Type', 'Kalite') + '</legend><div class="roles">' + Object.keys(COMM.KINDS).map(function (x) {
+        return '<label><input type="radio" name="kind" value="' + x + '"' + (k === x ? ' checked' : '') + (editing ? ' disabled' : '') + '> ' + COMM.T(COMM.KINDS[x]) + '</label>';
+      }).join('') + '</div></fieldset>' +
+      '<div class="grid2">' +
+        '<label class="fld"><span>' + LV.t('Titre en français *', 'Tit an franse *') + '</span><input id="tf" required minlength="3" maxlength="140" value="' + esc(r.title_fr || '') + '"></label>' +
+        '<label class="fld"><span>' + LV.t('Titre en kreyòl', 'Tit an kreyòl') + '</span><input id="th" maxlength="140" value="' + esc(r.title_ht || '') + '"></label>' +
+        '<label class="fld"><span>' + LV.t('Résumé en français', 'Rezime an franse') + '</span><textarea id="sf" maxlength="400" rows="2">' + esc(r.summary_fr || '') + '</textarea></label>' +
+        '<label class="fld"><span>' + LV.t('Résumé en kreyòl', 'Rezime an kreyòl') + '</span><textarea id="sh" maxlength="400" rows="2">' + esc(r.summary_ht || '') + '</textarea></label>' +
+      '</div>' +
+      '<div class="grid2"><label class="fld"><span>' + LV.t('Domaine *', 'Domèn *') + '</span><select id="dm">' + opt(D.domains, r.domain || 'physique') + '</select></label>' +
+        '<fieldset class="fld"><legend>' + LV.t('Public', 'Piblik') + '</legend><div class="roles">' + Object.keys(D.audiences).map(function (a) {
+          return '<label><input type="checkbox" name="aud" value="' + a + '"' + (aud.indexOf(a) >= 0 ? ' checked' : '') + '> ' + esc(APP.L(D.audiences[a])) + '</label>';
+        }).join('') + '</div></fieldset></div>' +
+      '<label class="fld" data-for="article document"><span>' + (k === 'article' ? LV.t('Texte de l\'article * (une ligne vide entre les paragraphes)', 'Tèks atik la * (yon liy vid ant paragraf yo)') : LV.t('Description (facultatif)', 'Deskripsyon (si ou vle)')) +
+        '</span><textarea id="bd" rows="10" maxlength="20000">' + esc(r.body || '') + '</textarea></label>' +
+      '<label class="fld" data-for="document"><span>' + LV.t('Fichier (PDF, PNG, JPEG ou WebP, 10 Mo maximum)', 'Fichye (PDF, PNG, JPEG oswa WebP, 10 Mo maksimòm)') +
+        (editing && r.file_name ? ' · ' + LV.t('actuel : ', 'kounye a : ') + esc(r.file_name) : '') + '</span><input id="fi" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/png,image/jpeg,image/webp"></label>' +
+      '<label class="fld" data-for="lien"><span>' + LV.t('Adresse du site (doit commencer par https://)', 'Adrès sit la (fòk li kòmanse ak https://)') + '</span><input id="ur" type="url" maxlength="500" placeholder="https://" value="' + esc(r.url || '') + '"></label>' +
+      '<p class="muted">' + LV.t('En envoyant, vous confirmez avoir le droit de partager ce contenu (vous en êtes l\'auteur, ou il est sous licence libre).', 'Lè ou voye l, ou konfime ou gen dwa pataje kontni sa a (se ou ki ekri l, oswa li gen yon lisans lib).') + '</p>' +
+      '<div class="btn-row"><button class="btn primary" type="submit">' + (editing ? LV.t('Enregistrer et renvoyer en validation', 'Anrejistre epi voye l pou validasyon ankò') : LV.t('Envoyer pour validation', 'Voye l pou validasyon')) + '</button>' +
+      (editing ? '<button class="btn" type="button" id="cancel">' + LV.t('Annuler', 'Anile') + '</button>' : '') + '</div>' +
+      '</form>';
+  }
+
+  function render() {
+    if (!me) return;
+    if (!AUTH.isTeacher(me)) {
+      var waiting = me.teacher_status === 'en_attente';
+      page.innerHTML = '<div class="panel"><h2>' + (waiting ? LV.t('Demande en cours de validation', 'Demann lan ap tann validasyon') : LV.t('Réservé aux enseignants', 'Se pou pwofesè sèlman')) + '</h2><p>' +
+        (waiting ? LV.t('Votre demande d\'accès enseignant a bien été reçue. Un administrateur doit la valider avant que vous puissiez déposer des ressources.', 'Nou resevwa demann aksè pwofesè ou. Yon administratè dwe valide l anvan ou ka mete resous.')
+                 : LV.t('Pour proposer des ressources, choisissez « Enseignant(e) » ou « Formateur / formatrice » dans Mon profil. Un administrateur validera votre demande.', 'Pou pwopoze resous, chwazi « Pwofesè » oswa « Fòmatè » nan Pwofil mwen. Yon administratè ap valide demann ou.')) +
+        '</p><a class="btn" href="profil.html">' + LV.t('Aller à Mon profil', 'Ale nan Pwofil mwen') + '</a></div>' +
+        '<div class="section-head"><h2>' + LV.t('Ressources publiées', 'Resous ki pibliye') + '</h2></div><p><a href="communaute.html">' + LV.t('Voir les ressources de la communauté →', 'Gade resous kominote a →') + '</a></p>';
+      return;
+    }
+    page.innerHTML = '<div class="contrib-wrap">' + formHtml() +
+      '<section><div class="section-head"><h2>' + LV.t('Mes envois', 'Sa m voye yo') + '</h2></div><div class="cres-list" id="mine">' +
+      (mine.map(function (r) {
+        var acts = r.status !== 'publie' ? '<button class="btn" data-edit>' + LV.t('Modifier', 'Modifye') + '</button><button class="btn danger" data-del>' + LV.t('Supprimer', 'Efase') + '</button>' : '';
+        return COMM.card(r, { status: true, actions: acts });
+      }).join('') || '<div class="empty">' + LV.t('Vous n\'avez encore rien proposé.', 'Ou poko pwopoze anyen.') + '</div>') + '</div></section></div>';
+    bind();
+  }
+
+  function showFields() {
+    var form = document.getElementById('form');
+    var k = (form.querySelector('input[name=kind]:checked') || {}).value || (editing && editing.kind);
+    form.querySelectorAll('[data-for]').forEach(function (el) { el.hidden = el.getAttribute('data-for').split(' ').indexOf(k) < 0; });
+  }
+
+  function bind() {
+    var form = document.getElementById('form');
+    form.querySelectorAll('input[name=kind]').forEach(function (i) {
+      i.addEventListener('change', function () { draftKind = i.value; keepDraft(); render(); });
+    });
+    showFields();
+    form.addEventListener('submit', function (e) { e.preventDefault(); send(form); });
+    var c = document.getElementById('cancel'); if (c) c.addEventListener('click', function () { editing = null; notice = null; render(); });
+    page.querySelectorAll('#mine .cres').forEach(function (el) {
+      var r = mine.filter(function (x) { return x.id === el.getAttribute('data-id'); })[0];
+      el.querySelector('[data-open]').addEventListener('click', function () { COMM.open(r, el); });
+      var ed = el.querySelector('[data-edit]'); if (ed) ed.addEventListener('click', function () { editing = r; notice = null; render(); window.scrollTo(0, 0); });
+      var dl = el.querySelector('[data-del]');
+      if (dl) dl.addEventListener('click', async function () {
+        if (dl.getAttribute('data-sure') !== '1') { dl.setAttribute('data-sure', '1'); dl.textContent = LV.t('Confirmer la suppression', 'Konfime efase'); return; }
+        dl.disabled = true;
+        var d = await sb.from('community_resources').delete().eq('id', r.id);
+        if (!d.error && r.file_path) await sb.storage.from('ressources').remove([r.file_path]);
+        await loadMine(); render();
+      });
+    });
+  }
+
+  /* Garde le texte saisi quand on change de type */
+  var draft = {};
+  function keepDraft() { ['tf', 'th', 'sf', 'sh', 'bd', 'ur'].forEach(function (id) { var el = document.getElementById(id); if (el) draft[id] = el.value; }); }
+
+  async function send(form) {
+    var btn = form.querySelector('button[type=submit]');
+    function fail(t) { notice = { kind: 'danger', text: t }; keepDraft(); render(); restore(); }
+    var kind = editing ? editing.kind : form.querySelector('input[name=kind]:checked').value;
+    var v = function (id) { return document.getElementById(id).value.trim(); };
+    var row = { title_fr: v('tf'), title_ht: v('th'), summary_fr: v('sf'), summary_ht: v('sh'), domain: v('dm'),
+      audiences: Array.prototype.map.call(form.querySelectorAll('input[name=aud]:checked'), function (i) { return i.value; }),
+      kind: kind, body: kind === 'lien' ? '' : document.getElementById('bd').value.trim(), url: null };
+    if (row.title_fr.length < 3) return fail(LV.t('Le titre en français doit faire au moins 3 caractères.', 'Tit an franse a dwe gen omwen 3 karaktè.'));
+    if (kind === 'article' && row.body.length < 20) return fail(LV.t('Le texte de l\'article est trop court.', 'Tèks atik la twò kout.'));
+    if (kind === 'lien') {
+      row.url = v('ur');
+      if (!/^https:\/\/[^\s<>"']+$/i.test(row.url)) return fail(LV.t('L\'adresse doit commencer par https:// et ne pas contenir d\'espace.', 'Adrès la dwe kòmanse ak https:// e li pa dwe gen espas.'));
+    }
+    var file = document.getElementById('fi') && document.getElementById('fi').files[0];
+    if (kind === 'document' && !file && !(editing && editing.file_path)) return fail(LV.t('Choisissez un fichier.', 'Chwazi yon fichye.'));
+    btn.disabled = true; btn.textContent = LV.t('Envoi en cours…', 'Ap voye…');
+    var uploaded = null;
+    try {
+      if (file) {
+        if (file.size > MAX) return fail(LV.t('Fichier trop lourd : 10 Mo maximum.', 'Fichye a twò lou : 10 Mo maksimòm.'));
+        var type = await sniff(file);
+        if (!type) return fail(LV.t('Type de fichier refusé. Seuls les PDF et les images PNG, JPEG ou WebP sont acceptés.', 'Nou pa aksepte kalite fichye sa a. Se PDF ak imaj PNG, JPEG oswa WebP sèlman.'));
+        var path = me.id + '/' + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2)) + TYPES[type];
+        var up = await sb.storage.from('ressources').upload(path, file, { contentType: type, upsert: false });
+        if (up.error) return fail(LV.t('Échec de l\'envoi du fichier : ', 'Fichye a pa ka voye : ') + up.error.message);
+        uploaded = path;
+        row.file_path = path;
+        row.file_name = file.name.replace(/[^\w.\- ()À-ÿ]/g, '_').slice(0, 200);
+      }
+      var res = editing
+        ? await sb.from('community_resources').update(row).eq('id', editing.id).select().single()
+        : await sb.from('community_resources').insert(row).select().single();
+      if (res.error) {
+        if (uploaded) await sb.storage.from('ressources').remove([uploaded]);
+        return fail(LV.t('Enregistrement refusé : ', 'Anrejistreman an refize : ') + res.error.message);
+      }
+      if (editing && uploaded && editing.file_path) await sb.storage.from('ressources').remove([editing.file_path]);
+      editing = null; draft = {};
+      notice = { kind: 'info', text: LV.t('Merci ! Votre ressource est envoyée. Elle sera visible après validation par un administrateur.', 'Mèsi ! Resous ou a voye. L ap parèt apre yon administratè valide l.') };
+      await loadMine(); render();
+    } catch (e) {
+      if (uploaded) await sb.storage.from('ressources').remove([uploaded]).catch(function () {});
+      fail(LV.t('Erreur réseau. Vérifiez votre connexion Internet et réessayez.', 'Erè rezo. Tcheke entènèt ou epi eseye ankò.'));
+    }
+  }
+  function restore() { Object.keys(draft).forEach(function (id) { var el = document.getElementById(id); if (el && !el.value) el.value = draft[id]; }); }
+
+  async function loadMine() {
+    var r = await sb.from('community_resources').select('*').eq('author', me.id).order('created_at', { ascending: false });
+    mine = r.data || [];
+  }
+
+  LV.onLang(function () { if (me) { keepDraft(); render(); restore(); } });
+  AUTH.ready.then(async function (p) {
+    me = p;
+    if (!me) { page.innerHTML = '<div class="empty">' + LV.t('Connexion Internet requise.', 'Fòk gen entènèt.') + '</div>'; return; }
+    if (AUTH.isTeacher(me)) await loadMine();
+    render();
+  });
+})();
+</script>
+</body>
+</html>

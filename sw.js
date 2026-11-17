@@ -3,12 +3,12 @@
    IMPORTANT : à chaque modification du site, augmentez VERSION pour que les téléphones
    téléchargent la nouvelle version. */
 
-var VERSION = 'lv-v6';
+var VERSION = 'lv-v7';
 var FILES = [
   './',
-  'index.html', 'bibliotheque.html', 'ressource.html', 'parcours.html', 'etudiant.html', 'enseignant.html', 'installer.html', 'profil.html', 'simulations.html',
+  'index.html', 'bibliotheque.html', 'ressource.html', 'parcours.html', 'etudiant.html', 'enseignant.html', 'installer.html', 'profil.html', 'simulations.html', 'compte.html', 'confidentialite.html', 'communaute.html', 'contribuer.html', 'admin.html',
   'css/style.css', 'css/app.css',
-  'js/theme.js', 'js/common.js', 'js/data.js', 'js/app.js', 'js/classe.js',
+  'js/theme.js', 'js/gate.js', 'js/config.js', 'js/auth.js', 'js/community.js', 'js/vendor/supabase.js', 'js/common.js', 'js/data.js', 'js/app.js', 'js/classe.js',
   'sims/pendule.html', 'sims/titrage.html', 'sims/mendel.html', 'sims/ohm.html', 'sims/logique.html', 'sims/sir.html', 'sims/solaire.html',
   'manifest.webmanifest',
   'img/sims/pendule.jpg', 'img/sims/titrage.jpg', 'img/sims/mendel.jpg', 'img/sims/ohm.jpg', 'img/sims/logique.jpg', 'img/sims/sir.jpg', 'img/sims/solaire.jpg',

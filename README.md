@@ -50,6 +50,31 @@ Le site est une PWA : `manifest.webmanifest` (nom, icônes, couleurs) et `sw.js`
 - **Mise à jour :** après toute modification, changez `VERSION` dans `sw.js` (ex. `lv-v2`), sinon les téléphones gardent l'ancienne version.
 - **Nouveau fichier :** ajoutez-le à la liste `FILES` de `sw.js` pour qu'il soit disponible hors ligne.
 
+## Comptes, ressources des enseignants et administration (Supabase)
+Le laboratoire est réservé aux participants inscrits. Le serveur est un projet Supabase (`js/config.js`).
+
+| Page | Pour qui | Rôle |
+|---|---|---|
+| `compte.html` | tout le monde | inscription, connexion, confirmation par e-mail, mot de passe oublié |
+| `confidentialite.html` | tout le monde | données personnelles |
+| `communaute.html` | participants confirmés | ressources publiées par les enseignants |
+| `contribuer.html` | enseignants validés | dépôt d'articles, de documents (PDF, PNG, JPEG, WebP, 10 Mo) et de liens https |
+| `admin.html` | administrateurs | tableau de bord, participants, demandes enseignant, validation des ressources, export CSV |
+
+Sécurité :
+- Toutes les règles sont appliquées par le serveur (`supabase/schema.sql`, Row Level Security). Modifier la page ne donne aucun droit.
+- Un participant ne peut pas changer son rôle ni son statut. Une ressource ajoutée ou modifiée repasse toujours « en attente ».
+- Les fichiers sont privés et ne s'ouvrent que par un lien signé valable 2 minutes. Le texte des dépôts n'est jamais interprété comme du HTML.
+- `js/gate.js` renvoie vers `compte.html` sans session. Le code des simulations reste lisible dans le dépôt public GitHub : la garde protège l'accès au site, pas le code source.
+- Ne jamais mettre la clé `service_role` ni le mot de passe de la base dans le site.
+
+Mise en service (une seule fois) :
+1. Supabase → SQL Editor : exécuter `supabase/schema.sql`.
+2. Supabase → Authentication → URL Configuration : Site URL = `https://duverts.github.io/labvirtyel-ayiti/`, Redirect URLs = `https://duverts.github.io/labvirtyel-ayiti/**` et `http://localhost:8000/**`.
+3. Supabase → Authentication → Emails → SMTP Settings : brancher un service d'envoi (Brevo, Resend…). Sans cela, Supabase n'envoie les e-mails qu'aux membres de l'équipe du projet.
+4. Créer son propre compte sur le site, confirmer l'e-mail, puis exécuter dans SQL Editor :
+   `update public.profiles set role = 'admin', teacher_status = 'approuve' where email = 'votre@adresse';`
+
 ## Suivi des étudiants sans serveur
 1. L'enseignant crée une classe dans « Espace enseignant » et partage le **code d'invitation** (`LVC1.…`).
 2. L'étudiant le colle dans « Ma classe », fait les parcours, puis génère son **code de résultats** (`LVR1.…`) et l'envoie (WhatsApp, SMS, fichier).

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mon profil · LabVirtyèl Ayiti</title>
 <script src="js/theme.js"></script>
+<script src="js/gate.js"></script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="author" content="DUVTECH">
@@ -33,7 +34,10 @@
   <span data-fr="Vos informations et réglages restent sur cet appareil." data-ht="Enfòmasyon ak reglaj ou yo rete sou aparèy sa a.">Vos informations et réglages restent sur cet appareil.</span>
   <span class="org" data-fr="Un projet DUVTECH · © 2026 DUVTECH" data-ht="Yon pwojè DUVTECH · © 2026 DUVTECH">Un projet DUVTECH · © 2026 DUVTECH</span>
 </footer>
+<script src="js/vendor/supabase.js"></script>
+<script src="js/config.js"></script>
 <script src="js/common.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
 <script>
@@ -62,7 +66,8 @@
   }
 
   function render() {
-    var p = profile(), pr = LV.prefs();
+    var p = profile(), pr = LV.prefs(), acc = AUTH.cached();
+    if (acc) { p.name = acc.full_name; p.school = acc.school; p.role = acc.profile_type; saveProfile(p); }
     var palette = pr.palette || 'classique', mode = pr.mode || 'auto', taille = pr.taille || 'normal';
     var curMode = document.documentElement.getAttribute('data-mode');
 
@@ -88,6 +93,7 @@
             return '<label><input type="radio" name="role" value="' + r[0] + '"' + (p.role === r[0] ? ' checked' : '') + '>' + LV.t(r[1], r[2]) + '</label>';
           }).join('') + '</div></div>' +
         '<div id="rolehint" class="qs"></div>' +
+        accountHtml(acc) +
       '</div>' +
 
       /* --- données --- */
@@ -126,6 +132,28 @@
     roleHint();
   }
 
+  /* Compte en ligne : adresse, rôle, déconnexion */
+  function accountHtml(acc) {
+    if (!acc) return '';
+    var role = acc.role === 'admin' ? LV.t('Administrateur', 'Administratè') : acc.role === 'enseignant' ? LV.t('Enseignant validé', 'Pwofesè valide') : LV.t('Apprenant', 'Aprann');
+    var req = acc.teacher_status === 'en_attente' ? ' · <span class="st warn">' + LV.t('Demande enseignant en attente', 'Demann pwofesè ap tann') + '</span>'
+      : acc.teacher_status === 'refuse' ? ' · <span class="st bad">' + LV.t('Demande enseignant refusée', 'Demann pwofesè refize') + '</span>' : '';
+    return '<div class="account-box"><div><span class="qs">' + LV.t('Compte', 'Kont') + '</span><b>' + esc(acc.email) + '</b>' +
+      '<span class="qs">' + role + req + '</span></div>' +
+      '<button class="btn" id="logout">' + LV.t('Se déconnecter', 'Dekonekte') + '</button></div>';
+  }
+  var pushTimer = null;
+  function pushAccount() {
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(async function () {
+      var acc = AUTH.cached(), p = profile();
+      if (!acc || !navigator.onLine) return;
+      var r = await AUTH.client.from('profiles').update({ full_name: p.name || '', school: p.school || '', profile_type: p.role || acc.profile_type })
+        .eq('id', acc.id).select().maybeSingle();
+      if (r.data) { localStorage.setItem('lv-account', JSON.stringify(r.data)); }
+    }, 800);
+  }
+
   function roleHint() {
     var r = (profile().role) || '';
     var el = document.getElementById('rolehint');
@@ -156,19 +184,21 @@
   function wire() {
     ['pname', 'pschool'].forEach(function (id) {
       document.getElementById(id).addEventListener('input', function () {
-        var p = profile(); p[id === 'pname' ? 'name' : 'school'] = this.value.trim(); saveProfile(p); flashSaved();
+        var p = profile(); p[id === 'pname' ? 'name' : 'school'] = this.value.trim(); saveProfile(p); flashSaved(); pushAccount();
       });
     });
     page.querySelectorAll('input[name=role]').forEach(function (r) {
-      r.addEventListener('change', function () { var p = profile(); p.role = r.value; saveProfile(p); flashSaved(); roleHint(); });
+      r.addEventListener('change', function () { var p = profile(); p.role = r.value; saveProfile(p); flashSaved(); roleHint(); pushAccount(); });
     });
+    var lo = document.getElementById('logout');
+    if (lo) lo.addEventListener('click', async function () { lo.disabled = true; await AUTH.signOut(); location.replace('compte.html'); });
     page.querySelectorAll('.pal').forEach(function (b) { b.addEventListener('click', function () { setPref('palette', b.getAttribute('data-v')); }); });
     page.querySelectorAll('#mode button').forEach(function (b) { b.addEventListener('click', function () { setPref('mode', b.getAttribute('data-v')); }); });
     page.querySelectorAll('#taille button').forEach(function (b) { b.addEventListener('click', function () { setPref('taille', b.getAttribute('data-v')); }); });
     page.querySelectorAll('#langue button').forEach(function (b) { b.addEventListener('click', function () { LV.setLang(b.getAttribute('data-v')); }); });
     document.getElementById('export').addEventListener('click', function () {
       var dump = {};
-      ['lv-profile', 'lv-prefs', 'lv-progress', 'lv-student'].forEach(function (k) {
+      ['lv-account', 'lv-profile', 'lv-prefs', 'lv-progress', 'lv-student'].forEach(function (k) {
         try { dump[k] = JSON.parse(localStorage.getItem(k)); } catch (e) { dump[k] = null; }
       });
       var a = document.createElement('a');
@@ -183,6 +213,7 @@
   }
 
   LV.onLang(render);
+  AUTH.ready.then(function () { render(); });
 })();
 </script>
 </body>
