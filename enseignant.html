@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espace enseignant · LabVirtyèl Ayiti</title>
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
+  <nav>
+    <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="bibliotheque.html" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
+    <a href="bibliotheque.html?tab=parcours" data-fr="Parcours" data-ht="Pakou">Parcours</a>
+    <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
+    <a href="enseignant.html" class="active" data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</a>
+  </nav>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+
+<main>
+  <h1 data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</h1>
+  <p class="subtitle" data-fr="Créez une classe, assignez des parcours et suivez la progression de vos étudiants, même sans Internet."
+     data-ht="Kreye yon klas, bay pakou epi swiv pwogrè etidyan ou yo, menm san entènèt.">Créez une classe, assignez des parcours et suivez la progression de vos étudiants, même sans Internet.</p>
+  <div class="dash">
+    <aside class="class-list" id="classes"></aside>
+    <section id="main"></section>
+  </div>
+</main>
+
+<footer class="site">
+  <span data-fr="Les données de vos classes restent dans ce navigateur. Exportez-les régulièrement en CSV." data-ht="Done klas ou yo rete nan navigatè sa a. Ekspòte yo an CSV regilyèman.">Les données de vos classes restent dans ce navigateur. Exportez-les régulièrement en CSV.</span>
+</footer>
+<script src="js/common.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/classe.js"></script>
+<script>
+(function () {
+  var D = APP.D, L = APP.L, esc = APP.esc;
+  var current = null;          /* id de la classe affichée, ou 'new' pour le formulaire */
+  var flash = '';              /* message après import */
+
+  function fmtDate(t) {
+    if (!t) return '—';
+    var d = new Date(t);
+    return d.toLocaleDateString(LV.lang() === 'ht' ? 'fr-HT' : 'fr-FR', { day: 'numeric', month: 'short' }) + ' ' +
+      d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  }
+  function pct(x) { return Math.round(x * 100) + ' %'; }
+  function barClass(p) { return p >= 67 ? '' : (p >= 34 ? 'mid' : 'low'); }
+
+  /* ---------- liste des classes ---------- */
+  function renderList() {
+    var t = CLASSE.teacher();
+    if (current !== 'new' && !CLASSE.getClass(current)) current = t.classes.length ? t.classes[0].id : 'new';
+    document.getElementById('classes').innerHTML =
+      t.classes.map(function (c) {
+        return '<button class="cl' + (c.id === current ? ' active' : '') + '" data-id="' + c.id + '"><b>' + esc(c.name) + '</b><small>' +
+          Object.keys(c.students).length + ' ' + LV.t('étudiant(s)', 'etidyan') + ' · ' + c.pathways.length + ' ' + LV.t('parcours', 'pakou') + '</small></button>';
+      }).join('') +
+      '<button class="btn primary" id="newc">+ ' + LV.t('Nouvelle classe', 'Nouvo klas') + '</button>' +
+      '<button class="btn" id="demo">' + LV.t('Charger une classe de démonstration', 'Chaje yon klas demonstrasyon') + '</button>';
+    document.querySelectorAll('.cl').forEach(function (b) { b.addEventListener('click', function () { current = b.getAttribute('data-id'); flash = ''; render(); }); });
+    document.getElementById('newc').addEventListener('click', function () { current = 'new'; render(); });
+    document.getElementById('demo').addEventListener('click', function () { current = CLASSE.demoClass().id; render(); });
+  }
+
+  function pathwayChecks(selected) {
+    return '<div class="checks">' + D.pathways.map(function (p) {
+      return '<label><input type="checkbox" value="' + p.id + '"' + (selected.indexOf(p.id) >= 0 ? ' checked' : '') + '>' +
+        '<span class="dot" style="--dc:' + D.domains[p.domain].color + ';width:10px;height:10px;border-radius:50%;background:var(--dc);display:inline-block"></span>' +
+        esc(L(p.title)) + ' <small style="color:var(--muted)">· ' + APP.pathMinutes(p) + ' min</small></label>';
+    }).join('') + '</div>';
+  }
+  function checked(root) { return Array.prototype.map.call(root.querySelectorAll('.checks input:checked'), function (i) { return i.value; }); }
+
+  /* ---------- formulaire de création ---------- */
+  function renderNew() {
+    var main = document.getElementById('main');
+    main.innerHTML = '<div class="panel"><h2>' + LV.t('Créer une classe', 'Kreye yon klas') + '</h2>' +
+      '<div class="form-row"><label for="cname">' + LV.t('Nom de la classe', 'Non klas la') + '</label><input type="text" id="cname" placeholder="' + LV.t('Ex. : L1 Biologie, groupe B', 'Egz. : L1 Biyoloji, gwoup B') + '"></div>' +
+      '<div class="form-row"><label for="cschool">' + LV.t('Établissement (facultatif)', 'Lekòl / inivèsite (si ou vle)') + '</label><input type="text" id="cschool"></div>' +
+      '<div class="form-row"><label>' + LV.t('Parcours à assigner', 'Pakou pou bay') + '</label>' + pathwayChecks([]) + '</div>' +
+      '<button class="btn primary" id="create">' + LV.t('Créer la classe', 'Kreye klas la') + '</button> <span class="msg" id="cmsg"></span></div>';
+    document.getElementById('create').addEventListener('click', function () {
+      var name = document.getElementById('cname').value.trim();
+      var ps = checked(main);
+      if (!name || !ps.length) {
+        document.getElementById('cmsg').innerHTML = '<span class="err">' + LV.t('Donnez un nom et choisissez au moins un parcours.', 'Bay yon non epi chwazi omwen yon pakou.') + '</span>';
+        return;
+      }
+      current = CLASSE.createClass(name, document.getElementById('cschool').value.trim(), ps).id;
+      render();
+    });
+  }
+
+  /* ---------- vue d'une classe ---------- */
+  function renderClass(c) {
+    var main = document.getElementById('main');
+    var paths = c.pathways.map(APP.pathway).filter(Boolean);
+    var sids = Object.keys(c.students);
+    var rows = sids.map(function (sid) {
+      var st = c.students[sid];
+      var stats = paths.map(function (p) { return CLASSE.pathStats(st, p); });
+      var done = stats.reduce(function (s, x) { return s + x.n; }, 0), total = stats.reduce(function (s, x) { return s + x.total; }, 0);
+      var qs = stats.filter(function (x) { return x.quiz !== null; });
+      var qavg = qs.length ? qs.reduce(function (s, x) { return s + x.quiz; }, 0) / qs.length : null;
+      return { sid: sid, st: st, stats: stats, overall: total ? Math.round(done / total * 100) : 0, qavg: qavg };
+    }).sort(function (a, b) { return b.overall - a.overall; });
+
+    var avgProg = rows.length ? Math.round(rows.reduce(function (s, r) { return s + r.overall; }, 0) / rows.length) : 0;
+    var withQ = rows.filter(function (r) { return r.qavg !== null; });
+    var avgQ = withQ.length ? withQ.reduce(function (s, r) { return s + r.qavg; }, 0) / withQ.length : null;
+    var last = rows.reduce(function (m, r) { return Math.max(m, r.st.updated || 0); }, 0);
+    var invite = CLASSE.inviteCode(c);
+
+    var head = '<tr><th>' + LV.t('Étudiant', 'Etidyan') + '</th>' + paths.map(function (p) {
+      return '<th style="--dc:' + D.domains[p.domain].color + '" title="' + esc(L(p.title)) + '"><span class="dot"></span>' + esc(L(D.domains[p.domain])) + '</th>';
+    }).join('') + '<th>' + LV.t('Total', 'Total') + '</th><th>' + LV.t('Dernier envoi', 'Dènye voye') + '</th><th></th></tr>';
+    var body = rows.map(function (r) {
+      var flag = (r.qavg !== null && r.qavg < 0.5) || r.overall < 34;
+      return '<tr><td><b>' + esc(r.st.name) + '</b>' + (flag ? '<span class="flag">' + LV.t('À accompagner', 'Bezwen èd') + '</span>' : '') + '</td>' +
+        r.stats.map(function (s) {
+          return '<td><span class="mbar ' + barClass(s.pct) + '"><i style="width:' + s.pct + '%"></i></span>' + s.n + '/' + s.total +
+            (s.quiz !== null ? '<div class="qs">' + LV.t('Quiz : ', 'Quiz : ') + pct(s.quiz) + '</div>' : '') + '</td>';
+        }).join('') +
+        '<td><b>' + r.overall + ' %</b>' + (r.qavg !== null ? '<div class="qs">' + LV.t('Quiz : ', 'Quiz : ') + pct(r.qavg) + '</div>' : '') + '</td>' +
+        '<td class="qs">' + fmtDate(r.st.updated) + '</td>' +
+        '<td><button class="icon-btn" data-del="' + r.sid + '" title="' + LV.t('Retirer', 'Retire') + '">✕</button></td></tr>';
+    }).join('');
+
+    main.innerHTML =
+      '<div class="class-head"><div><h2>' + esc(c.name) + '</h2><small>' + (c.school ? esc(c.school) + ' · ' : '') +
+        LV.t('Code de classe : ', 'Kòd klas : ') + '<b>' + c.id + '</b></small></div>' +
+        '<div class="btn-row"><button class="btn" id="csv">' + LV.t('Exporter en CSV', 'Ekspòte an CSV') + '</button>' +
+        '<button class="btn danger" id="delc">' + LV.t('Supprimer la classe', 'Efase klas la') + '</button></div></div>' +
+
+      '<div class="kpis">' +
+        '<div class="kpi"><div class="k">' + LV.t('Étudiants', 'Etidyan') + '</div><div class="v">' + rows.length + '</div></div>' +
+        '<div class="kpi"><div class="k">' + LV.t('Progression moyenne', 'Pwogrè mwayen') + '</div><div class="v">' + avgProg + ' %</div></div>' +
+        '<div class="kpi"><div class="k">' + LV.t('Score moyen aux quiz', 'Nòt mwayen nan quiz') + '</div><div class="v">' + (avgQ === null ? '—' : pct(avgQ)) + '</div></div>' +
+        '<div class="kpi"><div class="k">' + LV.t('Dernier envoi', 'Dènye voye') + '</div><div class="v" style="font-size:1rem">' + fmtDate(last) + '</div></div>' +
+      '</div>' +
+
+      '<div class="panel"><h2>' + LV.t('Progression de la classe', 'Pwogrè klas la') + '</h2>' +
+        (rows.length ? '<div class="table-wrap"><table class="matrix"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>'
+          : '<div class="empty">' + LV.t('Aucun résultat reçu pour le moment. Partagez le code d\'invitation, puis importez les codes de résultats de vos étudiants.',
+              'Poko gen rezilta. Pataje kòd envitasyon an, epi enpòte kòd rezilta etidyan yo.') + '</div>') +
+      '</div>' +
+
+      '<div class="panel"><h2>' + LV.t('Importer des résultats', 'Enpòte rezilta') + '</h2>' +
+        '<p class="qs" style="margin-top:0">' + LV.t('Collez un ou plusieurs codes reçus (un par ligne), ou choisissez des fichiers envoyés par vos étudiants.',
+          'Kole youn oswa plizyè kòd ou resevwa (youn pa liy), oswa chwazi fichye etidyan yo voye ba ou.') + '</p>' +
+        '<textarea class="code" id="codes" placeholder="LVR1.…"></textarea>' +
+        '<div class="btn-row" style="margin-top:8px"><button class="btn primary" id="imp">' + LV.t('Importer', 'Enpòte') + '</button>' +
+        '<label class="btn" style="cursor:pointer">' + LV.t('Choisir des fichiers', 'Chwazi fichye') + '<input type="file" id="files" multiple accept=".txt,.json" hidden></label></div>' +
+        '<div class="msg" id="imsg">' + flash + '</div></div>' +
+
+      '<div class="panel"><h2>' + LV.t('Inviter les étudiants', 'Envite etidyan yo') + '</h2>' +
+        '<div class="howto">' +
+          '<div><b>1.</b>' + LV.t('Copiez le code ci-dessous et envoyez-le à la classe (WhatsApp, SMS, tableau…).', 'Kopye kòd anba a epi voye l bay klas la (WhatsApp, SMS, tablo…).') + '</div>' +
+          '<div><b>2.</b>' + LV.t('Chaque étudiant le colle dans « Ma classe » et fait les parcours.', 'Chak etidyan kole l nan « Klas mwen » epi fè pakou yo.') + '</div>' +
+          '<div><b>3.</b>' + LV.t('L\'étudiant vous renvoie son code de résultats, que vous importez ici.', 'Etidyan an voye kòd rezilta l ba ou, ou enpòte l isit la.') + '</div>' +
+        '</div>' +
+        '<textarea class="code" id="invite" readonly>' + invite + '</textarea>' +
+        '<div class="btn-row" style="margin-top:8px"><button class="btn primary" id="copyinv">' + LV.t('Copier le code', 'Kopye kòd la') + '</button>' +
+        '<button class="btn" id="dlinv">' + LV.t('Télécharger', 'Telechaje') + '</button></div></div>' +
+
+      '<div class="panel"><h2>' + LV.t('Parcours assignés', 'Pakou ou bay') + '</h2>' + pathwayChecks(c.pathways) +
+        '<p class="qs">' + LV.t('Si vous changez les parcours, renvoyez le nouveau code d\'invitation à la classe.', 'Si ou chanje pakou yo, voye nouvo kòd envitasyon an bay klas la.') + '</p></div>';
+
+    /* événements */
+    main.querySelectorAll('[data-del]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var sid = b.getAttribute('data-del');
+        CLASSE.updateClass(c.id, function (k) { delete k.students[sid]; });
+        render();
+      });
+    });
+    document.getElementById('delc').addEventListener('click', function () {
+      var btn = this;
+      if (btn.dataset.confirm) { CLASSE.deleteClass(c.id); current = null; render(); return; }
+      btn.dataset.confirm = '1';
+      btn.textContent = LV.t('Cliquez encore pour confirmer', 'Klike ankò pou konfime');
+    });
+    document.getElementById('copyinv').addEventListener('click', function () { CLASSE.copy(invite, this, LV.t('✓ Copié', '✓ Kopye')); });
+    document.getElementById('dlinv').addEventListener('click', function () { CLASSE.download('invitation-' + c.id + '.txt', invite); });
+    document.getElementById('imp').addEventListener('click', function () { importText(c, document.getElementById('codes').value); });
+    document.getElementById('files').addEventListener('change', function (e) {
+      var files = Array.prototype.slice.call(e.target.files), texts = [];
+      files.forEach(function (f) {
+        var rd = new FileReader();
+        rd.onload = function () { texts.push(rd.result); if (texts.length === files.length) importText(c, texts.join('\n')); };
+        rd.readAsText(f);
+      });
+    });
+    main.querySelectorAll('.panel:last-child .checks input').forEach(function (inp) {
+      inp.addEventListener('change', function () {
+        var ps = checked(main.querySelector('.panel:last-child'));
+        if (!ps.length) { inp.checked = true; return; }   /* au moins un parcours */
+        CLASSE.updateClass(c.id, function (k) { k.pathways = ps; });
+        render();
+      });
+    });
+    document.getElementById('csv').addEventListener('click', function () {
+      var sep = ';', lines = [];
+      lines.push(['Etudiant'].concat(paths.map(function (p) { return p.title.fr + ' (%)'; }), paths.map(function (p) { return p.title.fr + ' quiz (%)'; }), ['Total (%)', 'Dernier envoi']).join(sep));
+      rows.forEach(function (r) {
+        lines.push([r.st.name].concat(
+          r.stats.map(function (s) { return s.pct; }),
+          r.stats.map(function (s) { return s.quiz === null ? '' : Math.round(s.quiz * 100); }),
+          [r.overall, new Date(r.st.updated).toISOString().slice(0, 16).replace('T', ' ')]
+        ).map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(sep));
+      });
+      CLASSE.download('resultats-' + c.id + '.csv', '﻿' + lines.join('\r\n'), 'text/csv;charset=utf-8');
+    });
+  }
+
+  function importText(c, text) {
+    var codes = (text.match(/LVR1\.[A-Za-z0-9_-]+/g) || []);
+    var ok = [], bad = 0, other = [];
+    codes.forEach(function (code) {
+      var r = CLASSE.importResult(c.id, code);
+      if (r.ok) ok.push(r.name); else if (r.msg === 'otherclass') other.push(r.name); else bad++;
+    });
+    flash = (ok.length ? '<div class="ok">✓ ' + ok.length + ' ' + LV.t('résultat(s) importé(s) : ', 'rezilta enpòte : ') + ok.map(esc).join(', ') + '</div>' : '') +
+      (other.length ? '<div class="err">' + LV.t('Code d\'une autre classe : ', 'Kòd yon lòt klas : ') + other.map(esc).join(', ') + '</div>' : '') +
+      (bad || !codes.length ? '<div class="err">' + LV.t('Code(s) non reconnu(s). Vérifiez qu\'il commence par LVR1.', 'Nou pa rekonèt kòd la. Verifye li kòmanse ak LVR1.') + '</div>' : '');
+    render();
+  }
+
+  function render() {
+    renderList();
+    if (current === 'new') renderNew();
+    else renderClass(CLASSE.getClass(current));
+  }
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>

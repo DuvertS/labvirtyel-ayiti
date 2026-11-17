@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loi d'Ohm et LED · LabVirtyèl</title>
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icons/favicon-32.png">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="../index.html">LabVirtyèl <span>Ayiti</span></a>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+<main>
+  <a class="back" href="../index.html" data-fr="← Toutes les expériences" data-ht="← Tout eksperyans yo">← Toutes les expériences</a>
+  <h1 data-fr="Loi d'Ohm et LED" data-ht="Lwa Ohm ak LED">Loi d'Ohm et LED</h1>
+  <p class="subtitle" data-fr="Électronique · Quelle résistance faut-il pour allumer une LED sans la griller ?" data-ht="Elektwonik · Ki rezistans ou bezwen pou limen yon LED san w pa boule l ?">Électronique · Quelle résistance faut-il pour allumer une LED sans la griller ?</p>
+
+  <div class="lab">
+    <div class="panel">
+      <h2 data-fr="Composants" data-ht="Konpozan yo">Composants</h2>
+      <div class="control">
+        <label for="V"><span data-fr="Tension de la source (V)" data-ht="Vòltaj sous la (V)">Tension de la source (V)</span><output for="V"></output></label>
+        <input type="range" id="V" min="0" max="12" step="0.1" value="5">
+      </div>
+      <div class="control">
+        <label for="R"><span data-fr="Résistance (Ω)" data-ht="Rezistans (Ω)">Résistance (Ω)</span><output for="R"></output></label>
+        <input type="range" id="R" min="10" max="1000" step="10" value="330">
+      </div>
+      <div class="control">
+        <label for="led" data-fr="Couleur de la LED" data-ht="Koulè LED la">Couleur de la LED</label>
+        <select id="led">
+          <option value="2.0" data-fr="Rouge (seuil 2,0 V)" data-ht="Wouj (papòt 2,0 V)">Rouge (seuil 2,0 V)</option>
+          <option value="2.1" data-fr="Jaune (seuil 2,1 V)" data-ht="Jòn (papòt 2,1 V)">Jaune (seuil 2,1 V)</option>
+          <option value="3.2" data-fr="Bleue (seuil 3,2 V)" data-ht="Ble (papòt 3,2 V)">Bleue (seuil 3,2 V)</option>
+        </select>
+      </div>
+      <button class="btn" id="repair" data-fr="Remplacer la LED" data-ht="Chanje LED la">Remplacer la LED</button>
+      <p style="font-size:.85rem;color:var(--muted)" data-fr="Courant maximal de la LED : 20 mA. Au-delà, elle grille."
+         data-ht="Kouran maksimòm LED la : 20 mA. Pi wo pase sa, li boule.">Courant maximal de la LED : 20 mA. Au-delà, elle grille.</p>
+    </div>
+
+    <div class="panel">
+      <svg class="view" viewBox="0 0 520 280" id="circuit" style="color:var(--text)">
+        <defs>
+          <radialGradient id="glow"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+        </defs>
+        <!-- fils -->
+        <path d="M80 60 H440 V220 H80 Z" fill="none" stroke="currentColor" stroke-width="3" opacity=".6"/>
+        <!-- pile -->
+        <rect x="60" y="110" width="40" height="60" fill="var(--surface)"/>
+        <line x1="62" y1="125" x2="98" y2="125" stroke="currentColor" stroke-width="4"/>
+        <line x1="70" y1="140" x2="90" y2="140" stroke="currentColor" stroke-width="4"/>
+        <line x1="62" y1="155" x2="98" y2="155" stroke="currentColor" stroke-width="4"/>
+        <text x="40" y="145" text-anchor="end" font-size="14" fill="currentColor" id="tV">5 V</text>
+        <!-- résistance -->
+        <rect x="200" y="46" width="90" height="28" rx="4" fill="var(--surface)" stroke="currentColor" stroke-width="3"/>
+        <text x="245" y="38" text-anchor="middle" font-size="14" fill="currentColor" id="tR">330 Ω</text>
+        <!-- LED -->
+        <g transform="translate(440 140)">
+          <rect x="-24" y="-30" width="48" height="60" fill="var(--surface)"/>
+          <circle id="halo" r="0" fill="url(#glow)"/>
+          <polygon points="-16,-14 16,-14 0,14" id="ledBody" stroke="currentColor" stroke-width="2"/>
+          <line x1="-16" y1="14" x2="16" y2="14" stroke="currentColor" stroke-width="3"/>
+          <text x="30" y="5" font-size="14" fill="currentColor">LED</text>
+        </g>
+        <!-- ampèremètre -->
+        <circle cx="260" cy="220" r="26" fill="var(--surface)" stroke="currentColor" stroke-width="3"/>
+        <text x="260" y="226" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor">A</text>
+        <text x="260" y="268" text-anchor="middle" font-size="14" fill="currentColor" id="tI">0 mA</text>
+      </svg>
+      <div class="readouts">
+        <div class="readout"><div class="k" data-fr="Courant" data-ht="Kouran">Courant</div><div class="v" id="I">—</div></div>
+        <div class="readout"><div class="k" data-fr="Tension aux bornes de R" data-ht="Vòltaj sou R">Tension aux bornes de R</div><div class="v" id="UR">—</div></div>
+        <div class="readout"><div class="k" data-fr="Puissance dans R" data-ht="Pisans nan R">Puissance dans R</div><div class="v" id="P">—</div></div>
+        <div class="readout"><div class="k" data-fr="État de la LED" data-ht="Eta LED la">État de la LED</div><div class="v" id="state">—</div></div>
+      </div>
+      <div class="alert danger" id="burn"></div>
+    </div>
+  </div>
+
+  <div class="panel theory">
+    <h2 data-fr="Ce qu'il faut retenir" data-ht="Sa pou w retni">Ce qu'il faut retenir</h2>
+    <p data-fr="La LED garde à ses bornes une tension presque fixe (son seuil). La résistance absorbe le reste et limite le courant :"
+       data-ht="LED la kenbe yon vòltaj prèske fiks (papòt li). Rezistans lan pran rès la epi li limite kouran an :">La LED garde à ses bornes une tension presque fixe (son seuil). La résistance absorbe le reste et limite le courant :</p>
+    <p><span class="formula">I = (U − U<sub>LED</sub>) / R</span></p>
+    <ul>
+      <li data-fr="Avec une pile de 9 V et une LED rouge, quelle résistance minimale faut-il pour rester sous 20 mA ?" data-ht="Avèk yon pil 9 V ak yon LED wouj, ki pi piti rezistans ou bezwen pou rete anba 20 mA ?">Avec une pile de 9 V et une LED rouge, quelle résistance minimale faut-il pour rester sous 20 mA ?</li>
+      <li data-fr="Pourquoi une LED bleue ne s'allume-t-elle pas avec 3 V ?" data-ht="Poukisa yon LED ble pa limen ak 3 V ?">Pourquoi une LED bleue ne s'allume-t-elle pas avec 3 V ?</li>
+      <li data-fr="Application : un panneau solaire de 12 V alimente une lampe LED. Comment la protéger ?" data-ht="Aplikasyon : yon panno solè 12 V ap bay yon lanp LED kouran. Kijan pou pwoteje l ?">Application : un panneau solaire de 12 V alimente une lampe LED. Comment la protéger ?</li>
+    </ul>
+  </div>
+</main>
+<script src="../js/common.js"></script>
+<script>
+(function () {
+  var V = 5, R = 330, Vf = 2.0, burnt = false;
+  var colors = { '2.0': '#e53935', '2.1': '#fbc02d', '3.2': '#1e88e5' };
+
+  function render() {
+    var I = burnt ? 0 : Math.max(0, V - Vf) / R;        /* en ampères */
+    var mA = I * 1000;
+    if (!burnt && mA > 20) { burnt = true; I = 0; mA = 0; }
+    var UR = I * R, P = UR * I;
+    var c = colors[Vf.toFixed(1)];
+    var frac = Math.min(1, mA / 20);
+    var body = document.getElementById('ledBody'), halo = document.getElementById('halo');
+    body.setAttribute('fill', burnt ? '#333' : c);
+    body.setAttribute('fill-opacity', burnt ? 1 : 0.25 + 0.75 * frac);
+    halo.setAttribute('r', burnt ? 0 : 10 + 40 * frac);
+    halo.setAttribute('opacity', frac);
+    document.getElementById('tV').textContent = V.toFixed(1) + ' V';
+    document.getElementById('tR').textContent = R + ' Ω';
+    document.getElementById('tI').textContent = mA.toFixed(1) + ' mA';
+    document.getElementById('I').textContent = mA.toFixed(1) + ' mA';
+    document.getElementById('UR').textContent = UR.toFixed(2) + ' V';
+    document.getElementById('P').textContent = (P * 1000).toFixed(1) + ' mW';
+    document.getElementById('state').textContent = burnt ? LV.t('Grillée', 'Boule')
+      : mA === 0 ? LV.t('Éteinte', 'Etenn') : mA < 5 ? LV.t('Faible', 'Fèb') : LV.t('Allumée', 'Limen');
+    var burn = document.getElementById('burn');
+    burn.classList.toggle('show', burnt);
+    burn.textContent = burnt ? LV.t('La LED a grillé : le courant a dépassé 20 mA. Augmentez la résistance, puis remplacez la LED.',
+                                    'LED la boule : kouran an depase 20 mA. Ogmante rezistans lan, epi chanje LED la.') : '';
+  }
+
+  LV.bindRange('V', function (v) { return v.toFixed(1); }, function (v) { V = v; render(); });
+  LV.bindRange('R', function (v) { return v; }, function (v) { R = v; render(); });
+  document.getElementById('led').addEventListener('change', function (e) { Vf = +e.target.value; render(); });
+  document.getElementById('repair').addEventListener('click', function () { burnt = false; render(); });
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>

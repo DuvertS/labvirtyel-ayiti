@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ressource · LabVirtyèl Ayiti</title>
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
+  <nav>
+    <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="bibliotheque.html" class="active" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
+    <a href="bibliotheque.html?tab=parcours" data-fr="Parcours" data-ht="Pakou">Parcours</a>
+    <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
+    <a href="enseignant.html" data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</a>
+  </nav>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+
+<main id="page"></main>
+
+<footer class="site">
+  <span data-fr="LabVirtyèl Ayiti · prototype · usage pédagogique uniquement" data-ht="LabVirtyèl Ayiti · pwototip · pou aprantisaj sèlman">LabVirtyèl Ayiti · prototype · usage pédagogique uniquement</span>
+</footer>
+<script src="js/common.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function () {
+  var D = APP.D, L = APP.L, esc = APP.esc;
+  var r = APP.resource(APP.param('id'));
+  var page = document.getElementById('page');
+
+  function render() {
+    if (!r) {
+      page.innerHTML = '<div class="empty">' + LV.t('Ressource introuvable.', 'Nou pa jwenn resous sa a.') +
+        ' <a href="bibliotheque.html">' + LV.t('Retour à la bibliothèque', 'Retounen nan bibliyotèk la') + '</a></div>';
+      return;
+    }
+    document.title = L(r.title) + ' · LabVirtyèl Ayiti';
+    var color = D.domains[r.domain].color;
+    var paths = APP.pathwaysOf(r.id);
+    var related = D.resources.filter(function (x) { return x.domain === r.domain && x.id !== r.id; });
+
+    page.innerHTML =
+      '<div class="crumbs"><a href="bibliotheque.html">' + LV.t('Bibliothèque', 'Bibliyotèk') + '</a> › ' +
+        '<a href="bibliotheque.html?domain=' + r.domain + '">' + esc(L(D.domains[r.domain])) + '</a> › ' + esc(L(r.title)) + '</div>' +
+      '<div class="res-head" style="--dc:' + color + '">' +
+        '<div class="dom">' + esc(L(D.domains[r.domain])) + ' · ' + esc(L(D.types[r.type])) + '</div>' +
+        '<h1>' + esc(L(r.title)) + '</h1>' +
+        '<p class="subtitle" style="margin:0 0 8px">' + esc(L(r.summary)) + '</p>' +
+        '<div class="chips"><span class="chip">' + r.minutes + ' min</span><span class="chip">' + esc(L(D.levels[r.level])) + '</span>' +
+          r.audiences.map(function (a) { return '<span class="chip">' + esc(L(D.audiences[a])) + '</span>'; }).join('') +
+          '<span class="chip">FR · HT</span></div>' +
+      '</div>' +
+      '<div class="res">' +
+        '<div class="res-main" id="body"></div>' +
+        '<aside class="res-side">' +
+          '<div class="panel"><h2>' + LV.t('Objectifs', 'Objektif') + '</h2><ul>' +
+            r.objectives.map(function (o) { return '<li>' + esc(L(o)) + '</li>'; }).join('') + '</ul></div>' +
+          '<div class="panel">' +
+            '<button class="btn primary" id="done"></button>' +
+            '<button class="btn" id="print">' + LV.t('Imprimer la fiche de TP', 'Enprime fich TP a') + '</button>' +
+          '</div>' +
+          (paths.length ? '<div class="panel related"><h2>' + LV.t('Dans le parcours', 'Nan pakou') + '</h2>' +
+            paths.map(function (p) {
+              return '<a href="parcours.html?id=' + p.id + '&step=' + p.steps.indexOf(r.id) + '">' + esc(L(p.title)) +
+                '<small>' + LV.t('Étape ', 'Etap ') + (p.steps.indexOf(r.id) + 1) + ' / ' + p.steps.length + '</small></a>';
+            }).join('') + '</div>' : '') +
+          (related.length ? '<div class="panel related"><h2>' + LV.t('Ressources liées', 'Lòt resous ki gen rapò') + '</h2>' +
+            related.map(function (x) {
+              return '<a href="ressource.html?id=' + x.id + '">' + esc(L(x.title)) + '<small>' + esc(L(D.types[x.type])) + ' · ' + x.minutes + ' min</small></a>';
+            }).join('') + '</div>' : '') +
+        '</aside>' +
+      '</div>';
+
+    APP.renderBody(r, document.getElementById('body'), updateDone);
+    document.getElementById('done').addEventListener('click', function () { APP.markDone(r.id); updateDone(); });
+    document.getElementById('print').addEventListener('click', function () { window.print(); });
+    updateDone();
+  }
+
+  function updateDone() {
+    var b = document.getElementById('done');
+    if (!b) return;
+    var done = APP.isDone(r.id);
+    b.textContent = done ? LV.t('✓ Terminé', '✓ Fini') : LV.t('Marquer comme terminé', 'Make li fini');
+    b.disabled = done;
+  }
+
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>

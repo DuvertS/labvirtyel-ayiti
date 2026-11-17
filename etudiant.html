@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ma classe · LabVirtyèl Ayiti</title>
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
+  <nav>
+    <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="bibliotheque.html" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
+    <a href="bibliotheque.html?tab=parcours" data-fr="Parcours" data-ht="Pakou">Parcours</a>
+    <a href="etudiant.html" class="active" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
+    <a href="enseignant.html" data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</a>
+  </nav>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+
+<main id="page"></main>
+
+<footer class="site">
+  <span data-fr="Votre progression reste sur cet appareil. Elle n'est envoyée à votre enseignant que si vous lui transmettez votre code."
+        data-ht="Pwogrè ou rete sou aparèy sa a. Pwofesè ou resevwa l sèlman si ou voye kòd ou a ba li.">Votre progression reste sur cet appareil.</span>
+</footer>
+<script src="js/common.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/classe.js"></script>
+<script>
+(function () {
+  var esc = APP.esc;
+  var page = document.getElementById('page');
+
+  function renderJoin(err) {
+    page.innerHTML =
+      '<h1>' + LV.t('Rejoindre une classe', 'Antre nan yon klas') + '</h1>' +
+      '<p class="subtitle">' + LV.t('Votre enseignant vous a envoyé un code d\'invitation qui commence par LVC1.', 'Pwofesè ou voye yon kòd envitasyon ba ou ki kòmanse ak LVC1.') + '</p>' +
+      '<div class="panel" style="max-width:640px">' +
+        '<div class="form-row"><label for="sname">' + LV.t('Votre nom complet', 'Non konplè ou') + '</label><input type="text" id="sname" value="' + esc((function () { try { return (JSON.parse(localStorage.getItem('lv-profile')) || {}).name || ''; } catch (e) { return ''; } })()) + '"></div>' +
+        '<div class="form-row"><label for="sinv">' + LV.t('Code d\'invitation', 'Kòd envitasyon') + '</label><textarea class="code" id="sinv" placeholder="LVC1.…"></textarea></div>' +
+        '<button class="btn primary" id="join">' + LV.t('Rejoindre', 'Antre') + '</button>' +
+        '<div class="msg">' + (err ? '<span class="err">' + err + '</span>' : '') + '</div>' +
+      '</div>' +
+      '<p class="qs" style="margin-top:16px">' + LV.t('Pas de classe ? Vous pouvez utiliser librement la ', 'Pa gen klas ? Ou ka itilize ') +
+        '<a href="bibliotheque.html">' + LV.t('bibliothèque', 'bibliyotèk la') + '</a>' + LV.t('.', ' lib.') + '</p>';
+    document.getElementById('join').addEventListener('click', function () {
+      var name = document.getElementById('sname').value.trim();
+      var inv = document.getElementById('sinv').value;
+      if (!name) return renderJoin(LV.t('Entrez votre nom.', 'Antre non ou.'));
+      if (!CLASSE.joinClass(name, inv)) return renderJoin(LV.t('Code d\'invitation non reconnu. Vérifiez qu\'il est complet et commence par LVC1.', 'Nou pa rekonèt kòd la. Verifye li konplè e li kòmanse ak LVC1.'));
+      render();
+    });
+  }
+
+  function renderClass(s) {
+    var paths = s.cls.pathways.map(APP.pathway).filter(Boolean);
+    var done = 0, total = 0;
+    paths.forEach(function (p) { var pr = APP.pathProgress(p); done += pr.n; total += pr.total; });
+    var pctAll = total ? Math.round(done / total * 100) : 0;
+
+    page.innerHTML =
+      '<div class="path-head" style="--dc:var(--accent)">' +
+        '<div class="dom">' + LV.t('Ma classe', 'Klas mwen') + (s.cls.school ? ' · ' + esc(s.cls.school) : '') + '</div>' +
+        '<h1>' + esc(s.cls.name) + '</h1><p>' + LV.t('Bonjour ', 'Bonjou ') + esc(s.name) + '</p>' +
+        '<div class="progress"><i style="width:' + pctAll + '%"></i></div>' +
+        '<div class="progress-label">' + done + ' / ' + total + ' ' + LV.t('étapes terminées', 'etap fini') + ' · ' + pctAll + ' %</div>' +
+      '</div>' +
+      '<div class="section-head"><h2>' + LV.t('Parcours à faire', 'Pakou pou fè') + '</h2></div>' +
+      '<div class="cards">' + paths.map(APP.pathwayCard).join('') + '</div>' +
+      '<div class="panel" style="margin-top:24px"><h2>' + LV.t('Envoyer ma progression à l\'enseignant', 'Voye pwogrè mwen bay pwofesè a') + '</h2>' +
+        '<p class="qs" style="margin-top:0">' + LV.t('Générez votre code, puis envoyez-le à votre enseignant (WhatsApp, SMS, e-mail) ou donnez-lui le fichier. Recommencez après chaque séance.',
+          'Fè kòd ou a, epi voye l bay pwofesè ou (WhatsApp, SMS, imèl) oswa ba li fichye a. Refè sa apre chak seyans.') + '</p>' +
+        '<button class="btn primary" id="gen">' + LV.t('Générer mon code de résultats', 'Fè kòd rezilta mwen') + '</button>' +
+        '<div id="out" style="margin-top:10px"></div>' +
+      '</div>' +
+      '<p style="margin-top:16px"><button class="btn" id="leave">' + LV.t('Quitter cette classe', 'Kite klas sa a') + '</button></p>';
+
+    document.getElementById('gen').addEventListener('click', function () {
+      var code = CLASSE.resultCode();
+      var out = document.getElementById('out');
+      out.innerHTML = '<textarea class="code" readonly>' + code + '</textarea>' +
+        '<div class="btn-row" style="margin-top:8px"><button class="btn primary" id="cp">' + LV.t('Copier', 'Kopye') + '</button>' +
+        '<button class="btn" id="dl">' + LV.t('Télécharger le fichier', 'Telechaje fichye a') + '</button>' +
+        '<a class="btn" style="text-decoration:none" target="_blank" href="https://wa.me/?text=' + encodeURIComponent(code) + '">WhatsApp</a></div>';
+      document.getElementById('cp').addEventListener('click', function () { CLASSE.copy(code, this, LV.t('✓ Copié', '✓ Kopye')); });
+      document.getElementById('dl').addEventListener('click', function () {
+        CLASSE.download('resultats-' + s.name.replace(/[^\w\-]+/g, '_') + '.txt', code);
+      });
+    });
+    document.getElementById('leave').addEventListener('click', function () {
+      var btn = this;
+      if (btn.dataset.confirm) { CLASSE.leaveClass(); render(); return; }
+      btn.dataset.confirm = '1';
+      btn.textContent = LV.t('Cliquez encore pour confirmer', 'Klike ankò pou konfime');
+    });
+  }
+
+  function render() {
+    var s = CLASSE.student();
+    if (s) renderClass(s); else renderJoin();
+  }
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>

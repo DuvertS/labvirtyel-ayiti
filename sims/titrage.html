@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Titrage acide-base · LabVirtyèl</title>
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icons/favicon-32.png">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="../index.html">LabVirtyèl <span>Ayiti</span></a>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+<main>
+  <a class="back" href="../index.html" data-fr="← Toutes les expériences" data-ht="← Tout eksperyans yo">← Toutes les expériences</a>
+  <h1 data-fr="Titrage acide-base" data-ht="Titraj asid-baz">Titrage acide-base</h1>
+  <p class="subtitle" data-fr="Chimie · Quelle est la concentration de l'acide chlorhydrique ?" data-ht="Chimi · Ki konsantrasyon asid kloridrik la ?">Chimie · Quelle est la concentration de l'acide chlorhydrique ?</p>
+
+  <div class="lab">
+    <div class="panel">
+      <h2 data-fr="Paramètres" data-ht="Paramèt">Paramètres</h2>
+      <div class="control">
+        <label for="Ca"><span data-fr="Concentration de HCl (mol/L)" data-ht="Konsantrasyon HCl (mol/L)">Concentration de HCl (mol/L)</span><output for="Ca"></output></label>
+        <input type="range" id="Ca" min="0.02" max="0.2" step="0.01" value="0.1">
+      </div>
+      <div class="control">
+        <label for="Vb"><span data-fr="Volume de NaOH versé (mL)" data-ht="Volim NaOH ou vide (mL)">Volume de NaOH versé (mL)</span><output for="Vb"></output></label>
+        <input type="range" id="Vb" min="0" max="40" step="0.1" value="0">
+      </div>
+      <div class="control">
+        <label for="ind" data-fr="Indicateur coloré" data-ht="Endikatè koulè">Indicateur coloré</label>
+        <select id="ind">
+          <option value="bbt" data-fr="Bleu de bromothymol" data-ht="Ble bwomotimòl">Bleu de bromothymol</option>
+          <option value="php" data-fr="Phénolphtaléine" data-ht="Fenolftaleyin">Phénolphtaléine</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="m1">−1 mL</button>
+        <button class="btn" id="p01">+0,1 mL</button>
+        <button class="btn primary" id="p1">+1 mL</button>
+      </div>
+      <p style="font-size:.85rem;color:var(--muted)" data-fr="Bécher : 20,0 mL de HCl. Burette : NaOH à 0,100 mol/L."
+         data-ht="Bechè : 20,0 mL HCl. Birèt : NaOH 0,100 mol/L.">Bécher : 20,0 mL de HCl. Burette : NaOH à 0,100 mol/L.</p>
+    </div>
+
+    <div class="panel">
+      <div style="display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:center">
+        <svg class="view" viewBox="0 0 140 220" aria-label="bécher">
+          <rect x="62" y="4" width="16" height="70" rx="3" fill="none" stroke="currentColor" opacity=".5"/>
+          <rect x="66" y="74" width="8" height="18" fill="currentColor" opacity=".4"/>
+          <path d="M20 100 V205 Q20 214 30 214 H110 Q120 214 120 205 V100" fill="none" stroke="currentColor" stroke-width="2" opacity=".7"/>
+          <rect id="liquid" x="22" y="150" width="96" height="62" rx="6"/>
+        </svg>
+        <canvas id="cv"></canvas>
+      </div>
+      <div class="readouts">
+        <div class="readout"><div class="k">pH</div><div class="v" id="pH">—</div></div>
+        <div class="readout"><div class="k" data-fr="Volume versé" data-ht="Volim vide">Volume versé</div><div class="v" id="vol">—</div></div>
+        <div class="readout"><div class="k" data-fr="Couleur" data-ht="Koulè">Couleur</div><div class="v" id="col">—</div></div>
+      </div>
+      <div class="alert info" id="eq"></div>
+    </div>
+  </div>
+
+  <div class="panel theory">
+    <h2 data-fr="Ce qu'il faut retenir" data-ht="Sa pou w retni">Ce qu'il faut retenir</h2>
+    <p data-fr="À l'équivalence, la quantité de soude versée est égale à la quantité d'acide initiale :" data-ht="Nan ekivalans, kantite soud ou vide egal ak kantite asid ki te la okòmansman :">À l'équivalence, la quantité de soude versée est égale à la quantité d'acide initiale :</p>
+    <p><span class="formula">C<sub>a</sub> · V<sub>a</sub> = C<sub>b</sub> · V<sub>éq</sub></span></p>
+    <ul>
+      <li data-fr="Mission : sans regarder le curseur de concentration, trouvez Véq, puis calculez Ca." data-ht="Misyon : san gade kisè konsantrasyon an, jwenn Véq, epi kalkile Ca.">Mission : sans regarder le curseur de concentration, trouvez Véq, puis calculez Ca.</li>
+      <li data-fr="Pourquoi le pH change-t-il si brusquement près de l'équivalence ?" data-ht="Poukisa pH a chanje konsa sanzatann toupre ekivalans lan ?">Pourquoi le pH change-t-il si brusquement près de l'équivalence ?</li>
+      <li data-fr="Quel indicateur convient le mieux pour ce titrage ? Pourquoi ?" data-ht="Ki endikatè ki pi bon pou titraj sa a ? Poukisa ?">Quel indicateur convient le mieux pour ce titrage ? Pourquoi ?</li>
+    </ul>
+  </div>
+</main>
+<script src="../js/common.js"></script>
+<script>
+(function () {
+  var W = 520, H = 300, Va = 20, Cb = 0.1, Kw = 1e-14;
+  var Ca = 0.1, Vb = 0, ind = 'bbt';
+  var ctx = LV.setupCanvas(document.getElementById('cv'), W, H);
+  var vbInput = document.getElementById('Vb');
+
+  /* pH exact d'un mélange acide fort / base forte, eau comprise. */
+  function pH(vb) {
+    var d = (Ca * Va - Cb * vb) / (Va + vb);           /* excès d'acide en mol/L (négatif = excès de base) */
+    var h = (d + Math.sqrt(d * d + 4 * Kw)) / 2;
+    return -Math.log10(h);
+  }
+
+  function color(p) {
+    if (ind === 'bbt') {
+      if (p < 6) return ['#e8c93a', LV.t('Jaune', 'Jòn')];
+      if (p < 7.6) return ['#5fae4e', LV.t('Vert', 'Vèt')];
+      return ['#2f6fd0', LV.t('Bleu', 'Ble')];
+    }
+    if (p < 8.2) return ['rgba(200,220,235,.55)', LV.t('Incolore', 'San koulè')];
+    if (p < 10) return ['#f29bc4', LV.t('Rose pâle', 'Woz pal')];
+    return ['#d6338a', LV.t('Rose', 'Woz')];
+  }
+
+  function render() {
+    var Veq = Ca * Va / Cb;
+    var pts = [];
+    for (var v = 0; v <= 40.001; v += 0.1) pts.push([v, pH(v)]);
+    var axes = LV.plot(ctx, W, H, {
+      xmin: 0, xmax: 40, ymin: 0, ymax: 14, xticks: 8, yticks: 7,
+      xlabel: LV.t('Volume de NaOH (mL)', 'Volim NaOH (mL)'),
+      series: [{ points: pts, color: LV.css('--accent') }]
+    });
+    var p = pH(Vb);
+    ctx.fillStyle = LV.css('--red');
+    ctx.beginPath(); ctx.arc(axes.X(Vb), axes.Y(p), 6, 0, 2 * Math.PI); ctx.fill();
+
+    var c = color(p);
+    var liquid = document.getElementById('liquid');
+    var level = 62 + Vb * 1.0;                          /* le niveau monte avec le volume */
+    liquid.setAttribute('y', 212 - level);
+    liquid.setAttribute('height', level);
+    liquid.setAttribute('fill', c[0]);
+    document.getElementById('pH').textContent = p.toFixed(2);
+    document.getElementById('vol').textContent = Vb.toFixed(1) + ' mL';
+    document.getElementById('col').textContent = c[1];
+
+    var eq = document.getElementById('eq');
+    var near = Math.abs(Vb - Veq) <= 0.25;
+    eq.classList.toggle('show', near);
+    eq.textContent = near ? LV.t('Vous êtes à l\'équivalence ! Notez Véq et calculez Ca.',
+                                 'Ou rive nan ekivalans lan ! Note Véq epi kalkile Ca.') : '';
+  }
+
+  function setVb(v) { Vb = Math.max(0, Math.min(40, Math.round(v * 10) / 10)); vbInput.value = Vb; vbInput.dispatchEvent(new Event('input')); }
+
+  LV.bindRange('Ca', function (v) { return v.toFixed(2); }, function (v) { Ca = v; render(); });
+  LV.bindRange('Vb', function (v) { return v.toFixed(1); }, function (v) { Vb = v; render(); });
+  document.getElementById('ind').addEventListener('change', function (e) { ind = e.target.value; render(); });
+  document.getElementById('m1').addEventListener('click', function () { setVb(Vb - 1); });
+  document.getElementById('p01').addEventListener('click', function () { setVb(Vb + 0.1); });
+  document.getElementById('p1').addEventListener('click', function () { setVb(Vb + 1); });
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>

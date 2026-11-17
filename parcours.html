@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parcours · LabVirtyèl Ayiti</title>
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
+  <nav>
+    <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="bibliotheque.html" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
+    <a href="bibliotheque.html?tab=parcours" class="active" data-fr="Parcours" data-ht="Pakou">Parcours</a>
+    <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
+    <a href="enseignant.html" data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</a>
+  </nav>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+
+<main id="page"></main>
+
+<footer class="site">
+  <span data-fr="LabVirtyèl Ayiti · prototype · usage pédagogique uniquement" data-ht="LabVirtyèl Ayiti · pwototip · pou aprantisaj sèlman">LabVirtyèl Ayiti · prototype · usage pédagogique uniquement</span>
+</footer>
+<script src="js/common.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function () {
+  var D = APP.D, L = APP.L, esc = APP.esc;
+  var p = APP.pathway(APP.param('id'));
+  var page = document.getElementById('page');
+  var finished = false;
+  /* Étape de départ : celle de l'adresse, sinon la première non terminée */
+  var current = 0;
+  if (p) {
+    var s = parseInt(APP.param('step'), 10);
+    if (s >= 0 && s < p.steps.length) current = s;
+    else { var firstTodo = p.steps.findIndex(function (id) { return !APP.isDone(id); }); current = firstTodo < 0 ? 0 : firstTodo; }
+  }
+
+  function render() {
+    if (!p) {
+      page.innerHTML = '<div class="empty">' + LV.t('Parcours introuvable.', 'Nou pa jwenn pakou sa a.') +
+        ' <a href="bibliotheque.html?tab=parcours">' + LV.t('Voir tous les parcours', 'Wè tout pakou yo') + '</a></div>';
+      return;
+    }
+    document.title = L(p.title) + ' · LabVirtyèl Ayiti';
+    var pr = APP.pathProgress(p);
+    var color = D.domains[p.domain].color;
+
+    var steps = p.steps.map(function (id, i) {
+      var r = APP.resource(id);
+      return '<button class="step' + (APP.isDone(id) ? ' done' : '') + (i === current && !finished ? ' current' : '') + '" data-i="' + i + '">' +
+        '<span class="n">' + (APP.isDone(id) ? '✓' : i + 1) + '</span>' +
+        '<span><b>' + esc(L(r.title)) + '</b><small>' + esc(L(D.types[r.type])) + ' · ' + r.minutes + ' min</small></span></button>';
+    }).join('');
+
+    page.innerHTML =
+      '<div class="crumbs"><a href="bibliotheque.html?tab=parcours">' + LV.t('Parcours', 'Pakou') + '</a> › ' + esc(L(p.title)) + '</div>' +
+      '<div class="path-head" style="--dc:' + color + '">' +
+        '<div class="dom">' + esc(L(D.domains[p.domain])) + ' · ' + LV.t('Parcours', 'Pakou') + ' · ' + APP.pathMinutes(p) + ' min</div>' +
+        '<h1>' + esc(L(p.title)) + '</h1><p>' + esc(L(p.summary)) + '</p>' +
+        '<div class="progress"><i style="width:' + pr.pct + '%"></i></div>' +
+        '<div class="progress-label">' + pr.n + ' / ' + pr.total + ' ' + LV.t('étapes terminées', 'etap fini') + ' · ' + pr.pct + ' %</div>' +
+      '</div>' +
+      '<div class="path">' +
+        '<nav class="stepper" aria-label="' + LV.t('Étapes', 'Etap') + '">' + steps + '</nav>' +
+        '<section id="stage"></section>' +
+      '</div>';
+
+    page.querySelectorAll('.step').forEach(function (b) {
+      b.addEventListener('click', function () { finished = false; go(+b.getAttribute('data-i')); });
+    });
+    renderStage();
+  }
+
+  function renderStage() {
+    var stage = document.getElementById('stage');
+    if (finished) {
+      stage.innerHTML = '<div class="finish"><div class="big">✓</div><h2>' + LV.t('Parcours terminé !', 'Ou fini pakou a !') + '</h2>' +
+        '<p>' + LV.t('Bravo. Vous pouvez revoir une étape ou choisir un autre parcours.', 'Bravo. Ou ka revize yon etap oswa chwazi yon lòt pakou.') + '</p>' +
+        '<a class="btn primary" href="bibliotheque.html?tab=parcours" style="text-decoration:none;display:inline-block">' + LV.t('Autres parcours', 'Lòt pakou') + '</a></div>';
+      return;
+    }
+    var r = APP.resource(p.steps[current]);
+    var last = current === p.steps.length - 1;
+    stage.innerHTML =
+      '<h2 style="margin:0 0 4px">' + LV.t('Étape ', 'Etap ') + (current + 1) + ' · ' + esc(L(r.title)) + '</h2>' +
+      '<p class="subtitle" style="margin:0 0 14px">' + esc(L(r.summary)) + '</p>' +
+      '<div id="stepbody"></div>' +
+      '<div class="step-nav">' +
+        '<button class="btn" id="prev"' + (current === 0 ? ' disabled' : '') + '>← ' + LV.t('Précédent', 'Anvan') + '</button>' +
+        '<button class="btn primary" id="next">' +
+          (r.type === 'quiz' && !APP.isDone(r.id) ? LV.t('Passer', 'Sote') : (last ? LV.t('Terminer le parcours', 'Fini pakou a') : LV.t('Terminé, étape suivante', 'Fini, etap apre a'))) + ' →</button>' +
+      '</div>';
+    APP.renderBody(r, document.getElementById('stepbody'), function () { refreshHeader(); });
+    document.getElementById('prev').addEventListener('click', function () { go(current - 1); });
+    document.getElementById('next').addEventListener('click', function () {
+      if (r.type !== 'quiz') APP.markDone(r.id);       /* un quiz n'est validé qu'une fois les réponses vérifiées */
+      if (last) { finished = true; render(); window.scrollTo(0, 0); } else go(current + 1);
+    });
+  }
+
+  /* Met à jour la barre de progression et l'étape sans recharger le quiz affiché */
+  function refreshHeader() {
+    var pr = APP.pathProgress(p);
+    page.querySelector('.progress i').style.width = pr.pct + '%';
+    page.querySelector('.progress-label').textContent = pr.n + ' / ' + pr.total + ' ' + LV.t('étapes terminées', 'etap fini') + ' · ' + pr.pct + ' %';
+    var b = page.querySelector('.step[data-i="' + current + '"]');
+    b.classList.add('done'); b.querySelector('.n').textContent = '✓';
+    var next = document.getElementById('next');
+    next.textContent = (current === p.steps.length - 1 ? LV.t('Terminer le parcours', 'Fini pakou a') : LV.t('Étape suivante', 'Etap apre a')) + ' →';
+  }
+
+  function go(i) { current = Math.max(0, Math.min(p.steps.length - 1, i)); render(); window.scrollTo(0, 0); }
+
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>

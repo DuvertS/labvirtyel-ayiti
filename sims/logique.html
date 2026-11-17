@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portes logiques · LabVirtyèl</title>
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icons/favicon-32.png">
+<style>
+  .switch { width: 64px; height: 64px; border-radius: 12px; font-size: 1.6rem; font-weight: 700; cursor: pointer;
+            border: 2px solid var(--border); background: var(--bg); color: var(--text); }
+  .switch.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+</style>
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="../index.html">LabVirtyèl <span>Ayiti</span></a>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+<main>
+  <a class="back" href="../index.html" data-fr="← Toutes les expériences" data-ht="← Tout eksperyans yo">← Toutes les expériences</a>
+  <h1 data-fr="Portes logiques" data-ht="Pòt lojik">Portes logiques</h1>
+  <p class="subtitle" data-fr="Informatique · Comment un ordinateur prend-il une décision avec des 0 et des 1 ?" data-ht="Enfòmatik · Kijan yon òdinatè pran desizyon ak 0 ak 1 ?">Informatique · Comment un ordinateur prend-il une décision avec des 0 et des 1 ?</p>
+
+  <div class="lab">
+    <div class="panel">
+      <h2 data-fr="Choisir la porte" data-ht="Chwazi pòt la">Choisir la porte</h2>
+      <div class="control">
+        <select id="gate">
+          <option value="AND" data-fr="ET (AND)" data-ht="AK (AND)">ET (AND)</option>
+          <option value="OR" data-fr="OU (OR)" data-ht="OUBYEN (OR)">OU (OR)</option>
+          <option value="NOT" data-fr="NON (NOT)" data-ht="NON (NOT)">NON (NOT)</option>
+          <option value="NAND" data-fr="NON-ET (NAND)" data-ht="NON-AK (NAND)">NON-ET (NAND)</option>
+          <option value="NOR" data-fr="NON-OU (NOR)" data-ht="NON-OUBYEN (NOR)">NON-OU (NOR)</option>
+          <option value="XOR" data-fr="OU exclusif (XOR)" data-ht="OUBYEN eksklizif (XOR)">OU exclusif (XOR)</option>
+        </select>
+      </div>
+      <h2 data-fr="Entrées (cliquez)" data-ht="Antre yo (klike)">Entrées (cliquez)</h2>
+      <div class="btn-row">
+        <button class="switch" id="A">0</button>
+        <button class="switch" id="B">0</button>
+      </div>
+      <p id="desc" style="font-size:.9rem;color:var(--muted)"></p>
+    </div>
+
+    <div class="panel">
+      <svg class="view" viewBox="0 0 520 220" style="color:var(--text)">
+        <text x="30" y="72" font-size="18" font-weight="700" fill="currentColor">A</text>
+        <text x="30" y="162" font-size="18" font-weight="700" fill="currentColor" id="labB">B</text>
+        <line id="wA" x1="50" y1="66" x2="200" y2="66" stroke-width="5"/>
+        <line id="wB" x1="50" y1="156" x2="200" y2="156" stroke-width="5"/>
+        <rect x="200" y="40" width="130" height="140" rx="16" fill="var(--surface)" stroke="currentColor" stroke-width="3"/>
+        <text x="265" y="120" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor" id="gname">AND</text>
+        <line id="wQ" x1="330" y1="110" x2="420" y2="110" stroke-width="5"/>
+        <circle id="lamp" cx="450" cy="110" r="28" stroke="currentColor" stroke-width="3"/>
+        <text x="450" y="162" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor" id="qv">Q = 0</text>
+      </svg>
+      <h2 style="margin-top:12px" data-fr="Table de vérité" data-ht="Tab verite">Table de vérité</h2>
+      <table class="tt"><thead><tr id="tth"></tr></thead><tbody id="ttb"></tbody></table>
+    </div>
+  </div>
+
+  <div class="panel theory">
+    <h2 data-fr="Ce qu'il faut retenir" data-ht="Sa pou w retni">Ce qu'il faut retenir</h2>
+    <p data-fr="Toutes les opérations d'un processeur (addition, comparaison, mémoire) sont construites en combinant ces portes."
+       data-ht="Tout operasyon yon pwosesè (adisyon, konparezon, memwa) fèt lè yo konbine pòt sa yo.">Toutes les opérations d'un processeur (addition, comparaison, mémoire) sont construites en combinant ces portes.</p>
+    <ul>
+      <li data-fr="Quelle porte allume une alarme seulement si la porte ET la fenêtre sont ouvertes ?" data-ht="Ki pòt ki limen yon alam sèlman si pòt la AK fenèt la louvri ?">Quelle porte allume une alarme seulement si la porte ET la fenêtre sont ouvertes ?</li>
+      <li data-fr="Montrez que NON-ET suffit pour fabriquer toutes les autres portes." data-ht="Montre ke NON-AK sifi pou fè tout lòt pòt yo.">Montrez que NON-ET suffit pour fabriquer toutes les autres portes.</li>
+      <li data-fr="La porte OU exclusif calcule le chiffre des unités de A + B. Vérifiez-le." data-ht="Pòt OUBYEN eksklizif la kalkile chif inite A + B. Verifye sa.">La porte OU exclusif calcule le chiffre des unités de A + B. Vérifiez-le.</li>
+    </ul>
+  </div>
+</main>
+<script src="../js/common.js"></script>
+<script>
+(function () {
+  var A = 0, B = 0, gate = 'AND';
+  var F = {
+    AND: function (a, b) { return a & b; }, OR: function (a, b) { return a | b; },
+    NOT: function (a) { return a ? 0 : 1; }, NAND: function (a, b) { return (a & b) ? 0 : 1; },
+    NOR: function (a, b) { return (a | b) ? 0 : 1; }, XOR: function (a, b) { return a ^ b; }
+  };
+  var D = {
+    AND: ['La sortie vaut 1 seulement si A ET B valent 1.', 'Sòti a vo 1 sèlman si A AK B vo 1.'],
+    OR: ['La sortie vaut 1 si au moins une entrée vaut 1.', 'Sòti a vo 1 si omwen youn nan antre yo vo 1.'],
+    NOT: ['La sortie est l\'inverse de A (B n\'est pas utilisée).', 'Sòti a se kontrè A (yo pa sèvi ak B).'],
+    NAND: ['L\'inverse de ET : 0 seulement si A et B valent 1.', 'Kontrè AK : 0 sèlman si A ak B vo 1.'],
+    NOR: ['L\'inverse de OU : 1 seulement si A et B valent 0.', 'Kontrè OUBYEN : 1 sèlman si A ak B vo 0.'],
+    XOR: ['1 si les entrées sont différentes.', '1 si antre yo diferan.']
+  };
+
+  function wire(id, v) {
+    var el = document.getElementById(id);
+    el.setAttribute('stroke', v ? LV.css('--accent') : LV.css('--border'));
+  }
+
+  function render() {
+    var one = gate === 'NOT';
+    var Q = F[gate](A, B);
+    document.getElementById('A').textContent = A; document.getElementById('A').classList.toggle('on', !!A);
+    var bBtn = document.getElementById('B');
+    bBtn.textContent = B; bBtn.classList.toggle('on', !!B); bBtn.disabled = one; bBtn.style.opacity = one ? .3 : 1;
+    document.getElementById('wB').style.opacity = one ? .2 : 1;
+    document.getElementById('labB').style.opacity = one ? .2 : 1;
+    wire('wA', A); wire('wB', B); wire('wQ', Q);
+    document.getElementById('gname').textContent = gate;
+    document.getElementById('lamp').setAttribute('fill', Q ? '#fbc02d' : LV.css('--bg'));
+    document.getElementById('qv').textContent = 'Q = ' + Q;
+    document.getElementById('desc').textContent = LV.t(D[gate][0], D[gate][1]);
+
+    document.getElementById('tth').innerHTML = one ? '<th>A</th><th>Q</th>' : '<th>A</th><th>B</th><th>Q</th>';
+    var rows = '';
+    var combos = one ? [[0, 0], [1, 0]] : [[0, 0], [0, 1], [1, 0], [1, 1]];
+    combos.forEach(function (c) {
+      var on = c[0] === A && (one || c[1] === B);
+      rows += '<tr class="' + (on ? 'on' : '') + '"><td>' + c[0] + '</td>' + (one ? '' : '<td>' + c[1] + '</td>') + '<td>' + F[gate](c[0], c[1]) + '</td></tr>';
+    });
+    document.getElementById('ttb').innerHTML = rows;
+  }
+
+  document.getElementById('A').addEventListener('click', function () { A = A ? 0 : 1; render(); });
+  document.getElementById('B').addEventListener('click', function () { B = B ? 0 : 1; render(); });
+  document.getElementById('gate').addEventListener('change', function (e) { gate = e.target.value; render(); });
+  LV.onLang(render);
+  render();
+})();
+</script>
+</body>
+</html>

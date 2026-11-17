@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Croisements de Mendel · LabVirtyèl</title>
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icons/favicon-32.png">
+<style>
+  .punnett { display: grid; grid-template-columns: 60px 1fr 1fr; gap: 6px; max-width: 360px; margin: 0 auto; }
+  .punnett div { border-radius: 8px; padding: 12px 4px; text-align: center; font-weight: 700; }
+  .punnett .hd { background: var(--bg); border: 1px solid var(--border); }
+  .punnett .cell { border: 1px solid var(--border); }
+  .flower { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-left: 6px; vertical-align: middle; border: 1px solid var(--border); }
+  .bar { height: 22px; border-radius: 6px; background: var(--accent); }
+  .bars td { padding: 4px 6px; font-size: .9rem; }
+</style>
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="../index.html">LabVirtyèl <span>Ayiti</span></a>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+<main>
+  <a class="back" href="../index.html" data-fr="← Toutes les expériences" data-ht="← Tout eksperyans yo">← Toutes les expériences</a>
+  <h1 data-fr="Croisements de Mendel" data-ht="Kwazman Mendel">Croisements de Mendel</h1>
+  <p class="subtitle" data-fr="SVT · Couleur des fleurs de pois : violet (A, dominant) ou blanc (a, récessif)"
+     data-ht="Syans lavi · Koulè flè pwa : vyolèt (A, dominan) oswa blan (a, resesif)">SVT · Couleur des fleurs de pois : violet (A, dominant) ou blanc (a, récessif)</p>
+
+  <div class="lab">
+    <div class="panel">
+      <h2 data-fr="Parents" data-ht="Paran yo">Parents</h2>
+      <div class="control">
+        <label for="p1" data-fr="Parent 1 (génotype)" data-ht="Paran 1 (jenotip)">Parent 1 (génotype)</label>
+        <select id="p1"><option>AA</option><option selected>Aa</option><option>aa</option></select>
+      </div>
+      <div class="control">
+        <label for="p2" data-fr="Parent 2 (génotype)" data-ht="Paran 2 (jenotip)">Parent 2 (génotype)</label>
+        <select id="p2"><option>AA</option><option selected>Aa</option><option>aa</option></select>
+      </div>
+      <div class="control">
+        <label for="n"><span data-fr="Nombre de descendants à faire pousser" data-ht="Konbyen pitit pou fè pouse">Nombre de descendants à faire pousser</span><output for="n"></output></label>
+        <input type="range" id="n" min="4" max="1000" step="4" value="100">
+      </div>
+      <button class="btn primary" id="grow" data-fr="Faire pousser la descendance" data-ht="Fè pitit yo pouse">Faire pousser la descendance</button>
+    </div>
+
+    <div class="panel">
+      <h2 data-fr="Échiquier de Punnett" data-ht="Tablo Punnett">Échiquier de Punnett</h2>
+      <div class="punnett" id="grid"></div>
+      <h2 style="margin-top:18px" data-fr="Théorie et observation" data-ht="Teyori ak obsèvasyon">Théorie et observation</h2>
+      <table class="bars" style="width:100%"><tbody id="bars"></tbody></table>
+    </div>
+  </div>
+
+  <div class="panel theory">
+    <h2 data-fr="Ce qu'il faut retenir" data-ht="Sa pou w retni">Ce qu'il faut retenir</h2>
+    <p data-fr="Chaque parent transmet un seul de ses deux allèles, au hasard. Un individu est violet dès qu'il possède au moins un allèle A."
+       data-ht="Chak paran bay yon sèl nan de alèl li yo, o aza. Yon plant vyolèt depi li gen omwen yon alèl A.">Chaque parent transmet un seul de ses deux allèles, au hasard. Un individu est violet dès qu'il possède au moins un allèle A.</p>
+    <ul>
+      <li data-fr="Croisez Aa × Aa avec 4 puis 1 000 descendants. Pourquoi l'observation se rapproche-t-elle de 3 : 1 ?" data-ht="Kwaze Aa × Aa ak 4 epi ak 1 000 pitit. Poukisa obsèvasyon an vin pi pre 3 : 1 ?">Croisez Aa × Aa avec 4 puis 1 000 descendants. Pourquoi l'observation se rapproche-t-elle de 3 : 1 ?</li>
+      <li data-fr="Une plante violette est-elle AA ou Aa ? Quel croisement-test permet de le savoir ?" data-ht="Yon plant vyolèt, èske li AA oswa Aa ? Ki kwazman-tès ki ka di w sa ?">Une plante violette est-elle AA ou Aa ? Quel croisement-test permet de le savoir ?</li>
+    </ul>
+  </div>
+</main>
+<script src="../js/common.js"></script>
+<script>
+(function () {
+  var N = 100, observed = null;
+  var violet = '#7b3fb5', white = '#f5f5f5';
+
+  function genotype(a, b) { return [a, b].sort().join(''); }   /* 'A' < 'a' donc AA, Aa, aa */
+  function isViolet(g) { return g.indexOf('A') >= 0; }
+
+  function render() {
+    var p1 = document.getElementById('p1').value, p2 = document.getElementById('p2').value;
+    var grid = document.getElementById('grid');
+    var html = '<div></div><div class="hd">' + p2[0] + '</div><div class="hd">' + p2[1] + '</div>';
+    var counts = { AA: 0, Aa: 0, aa: 0 };
+    for (var i = 0; i < 2; i++) {
+      html += '<div class="hd">' + p1[i] + '</div>';
+      for (var j = 0; j < 2; j++) {
+        var g = genotype(p1[i], p2[j]);
+        counts[g]++;
+        html += '<div class="cell">' + g + '<span class="flower" style="background:' + (isViolet(g) ? violet : white) + '"></span></div>';
+      }
+    }
+    grid.innerHTML = html;
+
+    var rows = [
+      [LV.t('Violet', 'Vyolèt'), (counts.AA + counts.Aa) / 4, observed ? observed.v / observed.n : null, violet],
+      [LV.t('Blanc', 'Blan'), counts.aa / 4, observed ? (observed.n - observed.v) / observed.n : null, white]
+    ];
+    var body = '';
+    rows.forEach(function (r) {
+      body += '<tr><td style="width:90px">' + r[0] + '<span class="flower" style="background:' + r[3] + '"></span></td>' +
+        '<td><div class="bar" style="width:' + (r[1] * 100) + '%;opacity:.35"></div>' +
+        '<small>' + LV.t('Théorie', 'Teyori') + ' : ' + (r[1] * 100).toFixed(0) + ' %</small>' +
+        (r[2] === null ? '' : '<div class="bar" style="width:' + (r[2] * 100) + '%"></div><small>' +
+          LV.t('Observé', 'Obsève') + ' : ' + (r[2] * 100).toFixed(1) + ' % (' + Math.round(r[2] * observed.n) + '/' + observed.n + ')</small>') +
+        '</td></tr>';
+    });
+    document.getElementById('bars').innerHTML = body;
+  }
+
+  function grow() {
+    var p1 = document.getElementById('p1').value, p2 = document.getElementById('p2').value, v = 0;
+    for (var k = 0; k < N; k++) {
+      var g = genotype(p1[Math.random() < 0.5 ? 0 : 1], p2[Math.random() < 0.5 ? 0 : 1]);
+      if (isViolet(g)) v++;
+    }
+    observed = { n: N, v: v };
+    render();
+  }
+
+  ['p1', 'p2'].forEach(function (id) {
+    document.getElementById(id).addEventListener('change', function () { observed = null; render(); });
+  });
+  LV.bindRange('n', function (v) { return v; }, function (v) { N = v; });
+  document.getElementById('grow').addEventListener('click', grow);
+  LV.onLang(render);
+  render();
+})();
+</script>
+</body>
+</html>

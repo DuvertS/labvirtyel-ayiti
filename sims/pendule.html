@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pendule simple · LabVirtyèl</title>
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icons/favicon-32.png">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="../index.html">LabVirtyèl <span>Ayiti</span></a>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+<main>
+  <a class="back" href="../index.html" data-fr="← Toutes les expériences" data-ht="← Tout eksperyans yo">← Toutes les expériences</a>
+  <h1 data-fr="Pendule simple" data-ht="Pandil senp">Pendule simple</h1>
+  <p class="subtitle" data-fr="Physique · De quoi dépend la période d'un pendule ?" data-ht="Fizik · Sou kisa peryòd yon pandil depann ?">Physique · De quoi dépend la période d'un pendule ?</p>
+
+  <div class="lab">
+    <div class="panel">
+      <h2 data-fr="Paramètres" data-ht="Paramèt">Paramètres</h2>
+      <div class="control">
+        <label for="L"><span data-fr="Longueur du fil (m)" data-ht="Longè fil la (m)">Longueur du fil (m)</span><output for="L"></output></label>
+        <input type="range" id="L" min="0.2" max="2" step="0.05" value="1">
+      </div>
+      <div class="control">
+        <label for="A"><span data-fr="Angle de départ (°)" data-ht="Ang depa (°)">Angle de départ (°)</span><output for="A"></output></label>
+        <input type="range" id="A" min="5" max="60" step="1" value="15">
+      </div>
+      <div class="control">
+        <label for="G" data-fr="Lieu de l'expérience" data-ht="Kote eksperyans lan fèt">Lieu de l'expérience</label>
+        <select id="G">
+          <option value="9.81" data-fr="Terre (9,81 m/s²)" data-ht="Latè (9,81 m/s²)">Terre (9,81 m/s²)</option>
+          <option value="1.62" data-fr="Lune (1,62 m/s²)" data-ht="Lalin (1,62 m/s²)">Lune (1,62 m/s²)</option>
+          <option value="3.71" data-fr="Mars (3,71 m/s²)" data-ht="Mas (3,71 m/s²)">Mars (3,71 m/s²)</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" id="go" data-fr="Lâcher le pendule" data-ht="Lage pandil la">Lâcher le pendule</button>
+        <button class="btn" id="stop" data-fr="Arrêter" data-ht="Kanpe">Arrêter</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <canvas id="cv"></canvas>
+      <div class="readouts">
+        <div class="readout"><div class="k" data-fr="Période mesurée" data-ht="Peryòd mezire">Période mesurée</div><div class="v" id="Tm">—</div></div>
+        <div class="readout"><div class="k" data-fr="Période théorique" data-ht="Peryòd teyorik">Période théorique</div><div class="v" id="Tt">—</div></div>
+        <div class="readout"><div class="k" data-fr="Écart" data-ht="Diferans">Écart</div><div class="v" id="Te">—</div></div>
+        <div class="readout"><div class="k" data-fr="Oscillations" data-ht="Osilasyon">Oscillations</div><div class="v" id="N">0</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel theory">
+    <h2 data-fr="Ce qu'il faut retenir" data-ht="Sa pou w retni">Ce qu'il faut retenir</h2>
+    <p data-fr="Pour de petits angles, la période ne dépend que de la longueur L et de la gravité g :" data-ht="Pou ti ang, peryòd la depann sèlman de longè L ak gravite g :">Pour de petits angles, la période ne dépend que de la longueur L et de la gravité g :</p>
+    <p><span class="formula">T₀ = 2π √(L / g)</span></p>
+    <ul>
+      <li data-fr="Défi 1 : multipliez la longueur par 4. Que devient la période ?" data-ht="Defi 1 : miltipliye longè a pa 4. Kisa ki rive peryòd la ?">Défi 1 : multipliez la longueur par 4. Que devient la période ?</li>
+      <li data-fr="Défi 2 : passez de 10° à 60°. Pourquoi l'écart avec la théorie augmente-t-il ?" data-ht="Defi 2 : pase de 10° a 60°. Poukisa diferans ak teyori a ogmante ?">Défi 2 : passez de 10° à 60°. Pourquoi l'écart avec la théorie augmente-t-il ?</li>
+      <li data-fr="Défi 3 : sur la Lune, le pendule va-t-il plus vite ou plus lentement ?" data-ht="Defi 3 : sou Lalin, èske pandil la ap mache pi vit oswa pi dousman ?">Défi 3 : sur la Lune, le pendule va-t-il plus vite ou plus lentement ?</li>
+    </ul>
+  </div>
+</main>
+<script src="../js/common.js"></script>
+<script>
+(function () {
+  var W = 640, H = 360;
+  var cv = document.getElementById('cv');
+  var ctx = LV.setupCanvas(cv, W, H);
+  var L = 1, A0 = 15, g = 9.81;
+  var theta, omega, t, running = false, last = null;
+  var lastCross = null, periods = [];
+
+  function reset() {
+    theta = A0 * Math.PI / 180; omega = 0; t = 0;
+    lastCross = null; periods = [];
+    document.getElementById('Tm').textContent = '—';
+    document.getElementById('Te').textContent = '—';
+    document.getElementById('N').textContent = '0';
+    var T0 = 2 * Math.PI * Math.sqrt(L / g);
+    document.getElementById('Tt').textContent = T0.toFixed(3) + ' s';
+    draw();
+  }
+
+  /* Intégration numérique de θ'' = -(g/L)·sin θ (Euler semi-implicite, petit pas). */
+  function step(dt) {
+    var h = 0.0005, n = Math.ceil(dt / h);
+    h = dt / n;
+    for (var i = 0; i < n; i++) {
+      var prev = theta;
+      omega += -(g / L) * Math.sin(theta) * h;
+      theta += omega * h;
+      t += h;
+      /* passage par la verticale dans le sens positif = une période complète entre deux passages */
+      if (prev < 0 && theta >= 0) {
+        var tc = t - h * theta / (theta - prev);
+        if (lastCross !== null) periods.push(tc - lastCross);
+        lastCross = tc;
+      }
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    var px = W / 2, py = 30;
+    var scale = 140;                       /* pixels par mètre */
+    var len = L * scale;
+    var bx = px + len * Math.sin(theta), by = py + len * Math.cos(theta);
+    ctx.strokeStyle = LV.css('--border'); ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(px - 80, py); ctx.lineTo(px + 80, py); ctx.stroke();
+    ctx.setLineDash([4, 4]); ctx.lineWidth = 1; ctx.strokeStyle = LV.css('--muted');
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, py + len + 20); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = LV.css('--text'); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(bx, by); ctx.stroke();
+    ctx.fillStyle = LV.css('--red');
+    ctx.beginPath(); ctx.arc(bx, by, 14, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = LV.css('--muted'); ctx.font = '13px ' + LV.css('--font');
+    ctx.fillText('t = ' + t.toFixed(2) + ' s', 12, H - 12);
+    ctx.fillText('θ = ' + (theta * 180 / Math.PI).toFixed(1) + '°', 12, H - 30);
+  }
+
+  function loop(ts) {
+    if (!running) return;
+    if (last !== null) step(Math.min((ts - last) / 1000, 0.05));
+    last = ts;
+    if (periods.length) {
+      var avg = periods.reduce(function (s, p) { return s + p; }, 0) / periods.length;
+      var T0 = 2 * Math.PI * Math.sqrt(L / g);
+      document.getElementById('Tm').textContent = avg.toFixed(3) + ' s';
+      document.getElementById('Te').textContent = ((avg - T0) / T0 * 100).toFixed(2) + ' %';
+      document.getElementById('N').textContent = periods.length;
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  LV.bindRange('L', function (v) { return v.toFixed(2); }, function (v) { L = v; running = false; reset(); });
+  LV.bindRange('A', function (v) { return v + '°'; }, function (v) { A0 = v; running = false; reset(); });
+  document.getElementById('G').addEventListener('change', function (e) { g = +e.target.value; running = false; reset(); });
+  document.getElementById('go').addEventListener('click', function () { reset(); running = true; last = null; requestAnimationFrame(loop); });
+  document.getElementById('stop').addEventListener('click', function () { running = false; });
+  reset();
+})();
+</script>
+</body>
+</html>

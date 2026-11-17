@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bibliothèque · LabVirtyèl Ayiti</title>
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
+  <nav>
+    <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="bibliotheque.html" id="nav-lib" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
+    <a href="bibliotheque.html?tab=parcours" id="nav-path" data-fr="Parcours" data-ht="Pakou">Parcours</a>
+    <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
+    <a href="enseignant.html" data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</a>
+  </nav>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+
+<main>
+  <h1 data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</h1>
+  <p class="subtitle" data-fr="Toutes les ressources, à utiliser seules ou dans un parcours." data-ht="Tout resous yo, pou itilize poukont yo oswa nan yon pakou.">Toutes les ressources, à utiliser seules ou dans un parcours.</p>
+
+  <div class="lib">
+    <aside class="filters" id="filters"></aside>
+    <section>
+      <div class="lib-top">
+        <div class="tabs">
+          <button data-tab="ressources" data-fr="Ressources" data-ht="Resous">Ressources</button>
+          <button data-tab="parcours" data-fr="Parcours" data-ht="Pakou">Parcours</button>
+        </div>
+        <input type="search" id="search" aria-label="Rechercher">
+        <button class="btn" id="clear" data-fr="Effacer les filtres" data-ht="Efase filtè yo">Effacer les filtres</button>
+      </div>
+      <div class="count" id="count"></div>
+      <div class="cards" id="results"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="site">
+  <span data-fr="LabVirtyèl Ayiti · prototype · usage pédagogique uniquement" data-ht="LabVirtyèl Ayiti · pwototip · pou aprantisaj sèlman">LabVirtyèl Ayiti · prototype · usage pédagogique uniquement</span>
+</footer>
+<script src="js/common.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function () {
+  var D = APP.D;
+  /* État des filtres, initialisé depuis l'adresse (ex. ?domain=chimie&type=simulation&q=pendule) */
+  var state = {
+    tab: APP.param('tab') === 'parcours' ? 'parcours' : 'ressources',
+    q: APP.param('q') || '',
+    domain: APP.param('domain') ? [APP.param('domain')] : [],
+    type: APP.param('type') ? [APP.param('type')] : [],
+    level: [],
+    audience: []
+  };
+  var search = document.getElementById('search');
+  search.value = state.q;
+
+  function group(key, title, dict, withDot) {
+    var html = '<h3>' + title + '</h3>';
+    Object.keys(dict).forEach(function (k) {
+      html += '<label><input type="checkbox" data-f="' + key + '" value="' + k + '"' + (state[key].indexOf(k) >= 0 ? ' checked' : '') + '>' +
+        (withDot ? '<span class="dot" style="--dc:' + dict[k].color + '"></span>' : '') + APP.esc(APP.L(dict[k])) + '</label>';
+    });
+    return html;
+  }
+
+  function renderFilters() {
+    var html = group('domain', LV.t('Domaine', 'Domèn'), D.domains, true);
+    if (state.tab === 'ressources') html += group('type', LV.t('Type', 'Kalite'), D.types);
+    html += group('level', LV.t('Niveau', 'Nivo'), D.levels);
+    html += group('audience', LV.t('Public', 'Piblik'), D.audiences);
+    var box = document.getElementById('filters');
+    box.innerHTML = html;
+    box.querySelectorAll('input').forEach(function (inp) {
+      inp.addEventListener('change', function () {
+        var arr = state[inp.getAttribute('data-f')];
+        if (inp.checked) arr.push(inp.value); else arr.splice(arr.indexOf(inp.value), 1);
+        renderResults();
+      });
+    });
+  }
+
+  /* Recherche sans tenir compte des accents ni des majuscules, dans les deux langues */
+  function norm(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function matchText(item) {
+    if (!state.q) return true;
+    var hay = norm([item.title.fr, item.title.ht, item.summary.fr, item.summary.ht, D.domains[item.domain].fr, D.domains[item.domain].ht].join(' '));
+    return norm(state.q).split(/\s+/).every(function (w) { return hay.indexOf(w) >= 0; });
+  }
+  function inList(list, v) { return !list.length || list.indexOf(v) >= 0; }
+  function anyIn(list, values) { return !list.length || values.some(function (v) { return list.indexOf(v) >= 0; }); }
+
+  function renderResults() {
+    var items, html;
+    if (state.tab === 'parcours') {
+      items = D.pathways.filter(function (p) {
+        return matchText(p) && inList(state.domain, p.domain) && inList(state.level, p.level) && anyIn(state.audience, p.audiences);
+      });
+      html = items.map(APP.pathwayCard).join('');
+    } else {
+      items = D.resources.filter(function (r) {
+        return matchText(r) && inList(state.domain, r.domain) && inList(state.type, r.type) && inList(state.level, r.level) && anyIn(state.audience, r.audiences);
+      });
+      html = items.map(APP.resourceCard).join('');
+    }
+    document.getElementById('count').textContent = items.length + ' ' +
+      (state.tab === 'parcours' ? LV.t('parcours', 'pakou') : LV.t('ressource(s)', 'resous'));
+    document.getElementById('results').innerHTML = html ||
+      '<div class="empty">' + LV.t('Aucun résultat. Essayez un autre mot ou effacez les filtres.', 'Pa gen rezilta. Eseye yon lòt mo oswa efase filtè yo.') + '</div>';
+  }
+
+  function render() {
+    search.placeholder = LV.t('Rechercher une ressource…', 'Chèche yon resous…');
+    document.querySelectorAll('.tabs button').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-tab') === state.tab); });
+    document.getElementById('nav-lib').classList.toggle('active', state.tab === 'ressources');
+    document.getElementById('nav-path').classList.toggle('active', state.tab === 'parcours');
+    renderFilters();
+    renderResults();
+  }
+
+  document.querySelectorAll('.tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { state.tab = b.getAttribute('data-tab'); state.type = []; render(); });
+  });
+  search.addEventListener('input', function () { state.q = search.value.trim(); renderResults(); });
+  document.getElementById('clear').addEventListener('click', function () {
+    state.q = ''; search.value = ''; state.domain = []; state.type = []; state.level = []; state.audience = []; render();
+  });
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>

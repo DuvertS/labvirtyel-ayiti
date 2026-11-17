@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mon profil · LabVirtyèl Ayiti</title>
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
+  <nav>
+    <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="bibliotheque.html" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
+    <a href="bibliotheque.html?tab=parcours" data-fr="Parcours" data-ht="Pakou">Parcours</a>
+    <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
+    <a href="enseignant.html" data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</a>
+  </nav>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+
+<main id="page"></main>
+
+<footer class="site">
+  <span data-fr="Vos informations et réglages restent sur cet appareil." data-ht="Enfòmasyon ak reglaj ou yo rete sou aparèy sa a.">Vos informations et réglages restent sur cet appareil.</span>
+</footer>
+<script src="js/common.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function () {
+  var D = APP.D, esc = APP.esc;
+  var page = document.getElementById('page');
+
+  function profile() { try { return JSON.parse(localStorage.getItem('lv-profile')) || {}; } catch (e) { return {}; } }
+  function saveProfile(p) { try { localStorage.setItem('lv-profile', JSON.stringify(p)); } catch (e) { /* rien */ } }
+
+  var PALETTES = [
+    { id: 'classique', fr: 'Classique', ht: 'Klasik', dfr: 'Papier, bleu marine, bordeaux', dht: 'Papye, ble maren, bòdo' },
+    { id: 'haiti', fr: 'Haïti', ht: 'Ayiti', dfr: 'Bleu et rouge du drapeau', dht: 'Ble ak wouj drapo a' },
+    { id: 'sobre', fr: 'Sobre', ht: 'Senp', dfr: 'Gris anthracite, discret', dht: 'Gri fonse, dous' },
+    { id: 'contraste', fr: 'Contraste élevé', ht: 'Gwo kontras', dfr: 'Lisibilité maximale', dht: 'Pi fasil pou li' }
+  ];
+  var ROLES = [
+    ['etudiant', 'Étudiant(e)', 'Etidyan'], ['enseignant', 'Enseignant(e)', 'Pwofesè'],
+    ['formateur', 'Formateur / formatrice', 'Fòmatè'], ['public', 'Grand public', 'Piblik']
+  ];
+
+  function seg(id, items, current) {
+    return '<div class="seg" id="' + id + '">' + items.map(function (it) {
+      return '<button type="button" data-v="' + it[0] + '" class="' + (it[0] === current ? 'on' : '') + '">' + it[1] + '</button>';
+    }).join('') + '</div>';
+  }
+
+  function render() {
+    var p = profile(), pr = LV.prefs();
+    var palette = pr.palette || 'classique', mode = pr.mode || 'auto', taille = pr.taille || 'normal';
+    var curMode = document.documentElement.getAttribute('data-mode');
+
+    /* statistiques personnelles */
+    var prog = APP.load();
+    var done = D.resources.filter(function (r) { return prog.done[r.id]; }).length;
+    var qs = Object.keys(prog.quiz).map(function (k) { return prog.quiz[k].score / prog.quiz[k].total; });
+    var qavg = qs.length ? Math.round(qs.reduce(function (a, b) { return a + b; }, 0) / qs.length * 100) + ' %' : '—';
+    var pdone = D.pathways.filter(function (x) { var s = APP.pathProgress(x); return s.n === s.total; }).length;
+    var student = null; try { student = JSON.parse(localStorage.getItem('lv-student')); } catch (e) { /* rien */ }
+
+    page.innerHTML =
+      '<h1>' + LV.t('Mon profil', 'Pwofil mwen') + '</h1>' +
+      '<p class="subtitle">' + LV.t('Vos informations, vos réglages d\'affichage et votre progression.', 'Enfòmasyon ou, reglaj afichaj ou ak pwogrè ou.') + '</p>' +
+      '<div class="prof">' +
+
+      /* --- informations --- */
+      '<div class="panel"><h2>' + LV.t('Mes informations', 'Enfòmasyon mwen') + '<span class="saved" id="saved">' + LV.t('Enregistré', 'Anrejistre') + '</span></h2>' +
+        '<div class="form-row"><label for="pname">' + LV.t('Nom complet', 'Non konplè') + '</label><input type="text" id="pname" value="' + esc(p.name || '') + '"></div>' +
+        '<div class="form-row"><label for="pschool">' + LV.t('Établissement', 'Lekòl / inivèsite') + '</label><input type="text" id="pschool" value="' + esc(p.school || '') + '"></div>' +
+        '<div class="form-row"><label>' + LV.t('Je suis', 'Mwen se') + '</label><div class="roles">' +
+          ROLES.map(function (r) {
+            return '<label><input type="radio" name="role" value="' + r[0] + '"' + (p.role === r[0] ? ' checked' : '') + '>' + LV.t(r[1], r[2]) + '</label>';
+          }).join('') + '</div></div>' +
+        '<div id="rolehint" class="qs"></div>' +
+      '</div>' +
+
+      /* --- données --- */
+      '<div class="panel"><h2>' + LV.t('Ma progression', 'Pwogrè mwen') + '</h2>' +
+        '<div class="mine">' +
+          '<div class="kpi"><div class="k">' + LV.t('Ressources terminées', 'Resous fini') + '</div><div class="v">' + done + ' / ' + D.resources.length + '</div></div>' +
+          '<div class="kpi"><div class="k">' + LV.t('Parcours terminés', 'Pakou fini') + '</div><div class="v">' + pdone + ' / ' + D.pathways.length + '</div></div>' +
+          '<div class="kpi"><div class="k">' + LV.t('Score moyen aux quiz', 'Nòt mwayen quiz') + '</div><div class="v">' + qavg + '</div></div>' +
+        '</div>' +
+        '<p class="qs">' + (student ? LV.t('Classe : ', 'Klas : ') + '<b>' + esc(student.cls.name) + '</b> · <a href="etudiant.html">' + LV.t('Ma classe', 'Klas mwen') + '</a>'
+          : LV.t('Vous n\'avez pas rejoint de classe. ', 'Ou poko antre nan yon klas. ') + '<a href="etudiant.html">' + LV.t('Rejoindre une classe', 'Antre nan yon klas') + '</a>') + '</p>' +
+        '<div class="btn-row"><button class="btn" id="export">' + LV.t('Exporter mes données', 'Ekspòte done mwen') + '</button>' +
+        '<button class="btn danger" id="reset">' + LV.t('Effacer ma progression', 'Efase pwogrè mwen') + '</button></div>' +
+      '</div>' +
+
+      /* --- apparence --- */
+      '<div class="panel full"><h2>' + LV.t('Apparence', 'Aparans') + '</h2>' +
+        '<span class="opt-label">' + LV.t('Couleurs', 'Koulè') + '</span>' +
+        '<div class="palettes">' + PALETTES.map(function (x) {
+          var dots = Object.keys(D.domains).map(function (k) { return '<i style="background:var(--d-' + k + ')"></i>'; }).join('');
+          return '<button type="button" class="pal' + (x.id === palette ? ' on' : '') + '" data-v="' + x.id + '" aria-pressed="' + (x.id === palette) + '">' +
+            '<div class="pal-preview" data-palette="' + x.id + '" data-mode="' + curMode + '"><div class="bar"></div><div class="title">LabVirtyèl</div>' +
+            '<div class="line"></div><div class="line" style="width:60%"></div><div class="dots">' + dots + '</div><span class="btnx">' + LV.t('Bouton', 'Bouton') + '</span></div>' +
+            '<span class="pal-name">' + LV.t(x.fr, x.ht) + '<small>' + LV.t(x.dfr, x.dht) + '</small></span></button>';
+        }).join('') + '</div>' +
+        '<span class="opt-label">' + LV.t('Mode', 'Mòd') + '</span>' +
+        seg('mode', [['auto', LV.t('Automatique', 'Otomatik')], ['clair', LV.t('Clair', 'Klè')], ['sombre', LV.t('Sombre', 'Fonse')]], mode) +
+        '<span class="opt-label">' + LV.t('Taille du texte', 'Gwosè tèks la') + '</span>' +
+        seg('taille', [['petit', LV.t('Petit', 'Piti')], ['normal', LV.t('Normal', 'Nòmal')], ['grand', LV.t('Grand', 'Gwo')]], taille) +
+        '<span class="opt-label">' + LV.t('Langue', 'Lang') + '</span>' +
+        seg('langue', [['fr', 'Français'], ['ht', 'Kreyòl']], LV.lang()) +
+      '</div>' +
+      '</div>';
+
+    wire();
+    roleHint();
+  }
+
+  function roleHint() {
+    var r = (profile().role) || '';
+    var el = document.getElementById('rolehint');
+    el.innerHTML = r === 'enseignant' || r === 'formateur'
+      ? LV.t('Accédez à votre ', 'Ale nan ') + '<a href="enseignant.html">' + LV.t('espace enseignant', 'espas pwofesè') + '</a>.'
+      : (r === 'etudiant' ? LV.t('Rejoignez votre classe dans ', 'Antre nan klas ou nan ') + '<a href="etudiant.html">' + LV.t('Ma classe', 'Klas mwen') + '</a>.' : '');
+  }
+
+  var savedTimer = null;
+  function flashSaved() {
+    var s = document.getElementById('saved'); s.classList.add('on');
+    clearTimeout(savedTimer); savedTimer = setTimeout(function () { s.classList.remove('on'); }, 1200);
+  }
+
+  /* Applique tout de suite les préférences à la page */
+  function applyPrefs(pr) {
+    var h = document.documentElement;
+    h.setAttribute('data-palette', pr.palette || 'classique');
+    h.setAttribute('data-taille', pr.taille || 'normal');
+    var m = pr.mode || 'auto';
+    var dark = m === 'sombre' || (m === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+    h.setAttribute('data-mode', dark ? 'sombre' : 'clair');
+  }
+  function setPref(key, v) {
+    var pr = LV.prefs(); pr[key] = v; LV.setPrefs(pr); applyPrefs(pr); render();
+  }
+
+  function wire() {
+    ['pname', 'pschool'].forEach(function (id) {
+      document.getElementById(id).addEventListener('input', function () {
+        var p = profile(); p[id === 'pname' ? 'name' : 'school'] = this.value.trim(); saveProfile(p); flashSaved();
+      });
+    });
+    page.querySelectorAll('input[name=role]').forEach(function (r) {
+      r.addEventListener('change', function () { var p = profile(); p.role = r.value; saveProfile(p); flashSaved(); roleHint(); });
+    });
+    page.querySelectorAll('.pal').forEach(function (b) { b.addEventListener('click', function () { setPref('palette', b.getAttribute('data-v')); }); });
+    page.querySelectorAll('#mode button').forEach(function (b) { b.addEventListener('click', function () { setPref('mode', b.getAttribute('data-v')); }); });
+    page.querySelectorAll('#taille button').forEach(function (b) { b.addEventListener('click', function () { setPref('taille', b.getAttribute('data-v')); }); });
+    page.querySelectorAll('#langue button').forEach(function (b) { b.addEventListener('click', function () { LV.setLang(b.getAttribute('data-v')); }); });
+    document.getElementById('export').addEventListener('click', function () {
+      var dump = {};
+      ['lv-profile', 'lv-prefs', 'lv-progress', 'lv-student'].forEach(function (k) {
+        try { dump[k] = JSON.parse(localStorage.getItem(k)); } catch (e) { dump[k] = null; }
+      });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' }));
+      a.download = 'labvirtyel-mes-donnees.json'; document.body.appendChild(a); a.click(); a.remove();
+    });
+    document.getElementById('reset').addEventListener('click', function () {
+      if (this.dataset.confirm) { try { localStorage.removeItem('lv-progress'); } catch (e) { /* rien */ } render(); return; }
+      this.dataset.confirm = '1';
+      this.textContent = LV.t('Cliquez encore pour confirmer', 'Klike ankò pou konfime');
+    });
+  }
+
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>

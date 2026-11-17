@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Propagation d'une épidémie · LabVirtyèl</title>
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icons/favicon-32.png">
+<style>
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: .9rem; margin-top: 8px; }
+  .legend i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+</style>
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="../index.html">LabVirtyèl <span>Ayiti</span></a>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+<main>
+  <a class="back" href="../index.html" data-fr="← Toutes les expériences" data-ht="← Tout eksperyans yo">← Toutes les expériences</a>
+  <h1 data-fr="Propagation d'une épidémie" data-ht="Kijan yon epidemi gaye">Propagation d'une épidémie</h1>
+  <p class="subtitle" data-fr="Santé publique · Modèle SIR dans une ville de 10 000 habitants" data-ht="Sante piblik · Modèl SIR nan yon vil 10 000 moun">Santé publique · Modèle SIR dans une ville de 10 000 habitants</p>
+
+  <div class="lab">
+    <div class="panel">
+      <h2 data-fr="Paramètres" data-ht="Paramèt">Paramètres</h2>
+      <div class="control">
+        <label for="R0"><span data-fr="R₀ : personnes infectées par un malade" data-ht="R₀ : konbyen moun yon malad enfekte">R₀ : personnes infectées par un malade</span><output for="R0"></output></label>
+        <input type="range" id="R0" min="0.5" max="6" step="0.1" value="2.5">
+      </div>
+      <div class="control">
+        <label for="D"><span data-fr="Durée de la maladie (jours)" data-ht="Konbyen jou maladi a dire">Durée de la maladie (jours)</span><output for="D"></output></label>
+        <input type="range" id="D" min="3" max="21" step="1" value="7">
+      </div>
+      <div class="control">
+        <label for="vac"><span data-fr="Population vaccinée (%)" data-ht="Moun ki pran vaksen (%)">Population vaccinée (%)</span><output for="vac"></output></label>
+        <input type="range" id="vac" min="0" max="90" step="5" value="0">
+      </div>
+      <div class="control">
+        <label for="i0"><span data-fr="Malades au départ" data-ht="Malad okòmansman">Malades au départ</span><output for="i0"></output></label>
+        <input type="range" id="i0" min="1" max="100" step="1" value="10">
+      </div>
+    </div>
+
+    <div class="panel">
+      <canvas id="cv"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--s-color)"></i><span data-fr="S : sains, peuvent tomber malades" data-ht="S : an sante, ka tonbe malad">S : sains, peuvent tomber malades</span></span>
+        <span><i style="background:var(--i-color)"></i><span data-fr="I : infectés" data-ht="I : enfekte">I : infectés</span></span>
+        <span><i style="background:var(--r-color)"></i><span data-fr="R : guéris ou vaccinés" data-ht="R : geri oswa vaksinen">R : guéris ou vaccinés</span></span>
+      </div>
+      <div class="readouts">
+        <div class="readout"><div class="k" data-fr="Pic d'infections" data-ht="Pi gwo kantite malad">Pic d'infections</div><div class="v" id="peak">—</div></div>
+        <div class="readout"><div class="k" data-fr="Jour du pic" data-ht="Jou pi gwo pwen an">Jour du pic</div><div class="v" id="day">—</div></div>
+        <div class="readout"><div class="k" data-fr="Total tombé malade" data-ht="Total moun ki tonbe malad">Total tombé malade</div><div class="v" id="tot">—</div></div>
+        <div class="readout"><div class="k" data-fr="R effectif au départ" data-ht="R efektif okòmansman">R effectif au départ</div><div class="v" id="reff">—</div></div>
+      </div>
+      <div class="alert info" id="herd"></div>
+    </div>
+  </div>
+
+  <div class="panel theory">
+    <h2 data-fr="Ce qu'il faut retenir" data-ht="Sa pou w retni">Ce qu'il faut retenir</h2>
+    <p data-fr="L'épidémie grandit tant que chaque malade contamine plus d'une personne. Avec une part v de la population vaccinée, le R effectif devient :"
+       data-ht="Epidemi an grandi toutotan chak malad bay plis pase yon moun maladi a. Lè yon pati v nan popilasyon an pran vaksen, R efektif la vin :">L'épidémie grandit tant que chaque malade contamine plus d'une personne. Avec une part v de la population vaccinée, le R effectif devient :</p>
+    <p><span class="formula">R<sub>eff</sub> = R₀ × (1 − v)</span></p>
+    <ul>
+      <li data-fr="Avec R₀ = 2,5, quel pourcentage de vaccination empêche l'épidémie de démarrer ?" data-ht="Avèk R₀ = 2,5, ki pousantaj vaksinasyon ki anpeche epidemi an kòmanse ?">Avec R₀ = 2,5, quel pourcentage de vaccination empêche l'épidémie de démarrer ?</li>
+      <li data-fr="Le lavage des mains et l'eau potable font baisser R₀. Diminuez R₀ de 2,5 à 1,5 : que devient le pic ?" data-ht="Lave men ak dlo potab fè R₀ bese. Bese R₀ soti 2,5 rive 1,5 : kisa ki rive pi gwo pwen an ?">Le lavage des mains et l'eau potable font baisser R₀. Diminuez R₀ de 2,5 à 1,5 : que devient le pic ?</li>
+    </ul>
+    <p style="font-size:.85rem;color:var(--muted)" data-fr="Modèle simplifié à but pédagogique : il ne prédit pas une épidémie réelle et ne remplace pas un avis médical."
+       data-ht="Modèl sa a senplifye pou aprantisaj : li pa predi yon vrè epidemi e li pa ranplase konsèy doktè.">Modèle simplifié à but pédagogique : il ne prédit pas une épidémie réelle et ne remplace pas un avis médical.</p>
+  </div>
+</main>
+<script src="../js/common.js"></script>
+<script>
+(function () {
+  var W = 640, H = 340, N = 10000, DAYS = 180;
+  var R0 = 2.5, D = 7, vac = 0, I0 = 10;
+  var ctx = LV.setupCanvas(document.getElementById('cv'), W, H);
+
+  function simulate() {
+    var gamma = 1 / D, beta = R0 * gamma, dt = 0.1;
+    var I = I0, R = (N - I0) * vac, S = N - I - R;
+    var s = [[0, S]], i = [[0, I]], r = [[0, R]], peak = I, peakDay = 0;
+    for (var t = dt, k = 1; t <= DAYS + 1e-9; t += dt, k++) {
+      var inf = beta * S * I / N * dt, rec = gamma * I * dt;
+      S -= inf; I += inf - rec; R += rec;
+      if (I > peak) { peak = I; peakDay = t; }
+      if (k % 10 === 0) { s.push([t, S]); i.push([t, I]); r.push([t, R]); }
+    }
+    var vaccinated = (N - I0) * vac;
+    return { s: s, i: i, r: r, peak: peak, peakDay: peakDay, total: R + I - vaccinated };
+  }
+
+  function render() {
+    var res = simulate();
+    LV.plot(ctx, W, H, {
+      xmin: 0, xmax: DAYS, ymin: 0, ymax: N, xticks: 6, yticks: 5,
+      xlabel: LV.t('Jours', 'Jou'),
+      yfmt: function (v) { return (v / 1000).toFixed(0) + ' k'; },
+      series: [
+        { points: res.s, color: LV.css('--s-color') },
+        { points: res.r, color: LV.css('--r-color') },
+        { points: res.i, color: LV.css('--i-color'), width: 3 }
+      ]
+    });
+    var fmt = function (v) { return Math.round(v).toLocaleString('fr-FR'); };
+    document.getElementById('peak').textContent = fmt(res.peak);
+    document.getElementById('day').textContent = res.peakDay < 0.05 ? '—' : LV.t('jour ', 'jou ') + Math.round(res.peakDay);
+    document.getElementById('tot').textContent = fmt(res.total) + ' (' + (res.total / N * 100).toFixed(0) + ' %)';
+    var reff = R0 * (1 - vac);
+    document.getElementById('reff').textContent = reff.toFixed(2);
+    var herd = document.getElementById('herd');
+    herd.classList.add('show');
+    herd.textContent = reff < 1
+      ? LV.t('R effectif < 1 : l\'épidémie s\'éteint d\'elle-même. C\'est l\'immunité collective.',
+             'R efektif < 1 : epidemi an mouri pou kont li. Se iminite kolektif.')
+      : LV.t('R effectif > 1 : l\'épidémie se propage. Seuil de vaccination pour l\'arrêter : ',
+             'R efektif > 1 : epidemi an ap gaye. Pousantaj vaksinasyon pou kanpe l : ') + Math.max(0, (1 - 1 / R0) * 100).toFixed(0) + ' %.';
+  }
+
+  LV.bindRange('R0', function (v) { return v.toFixed(1); }, function (v) { R0 = v; render(); });
+  LV.bindRange('D', function (v) { return v; }, function (v) { D = v; render(); });
+  LV.bindRange('vac', function (v) { return v + ' %'; }, function (v) { vac = v / 100; render(); });
+  LV.bindRange('i0', function (v) { return v; }, function (v) { I0 = v; render(); });
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>
