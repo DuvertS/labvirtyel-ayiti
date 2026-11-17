@@ -4,7 +4,7 @@ Un projet **DUVTECH**.
 
 Un laboratoire virtuel bilingue (français et kreyòl) qui fonctionne **sans Internet et sans serveur**.
 
-Publics : écoles classiques (3e cycle du fondamental et secondaire), universités, formation professionnelle et grand public. L'accueil renvoie aussi vers le catalogue Harvard de 34 000 ressources d'apprentissage et d'enseignement (en ligne, surtout en anglais).
+Publics : écoles classiques (3e cycle du fondamental et secondaire), universités, formation professionnelle et grand public.
 
 ## Lancer le prototype
 Double-cliquez sur `index.html`, ou copiez le dossier sur une clé USB ou un téléphone et ouvrez `index.html` dans le navigateur.
@@ -13,6 +13,7 @@ Double-cliquez sur `index.html`, ou copiez le dossier sur une clé USB ou un té
 ```
 LabVirtyel-Ayiti/
 ├── index.html          Accueil : recherche, domaines, parcours à la une
+├── simulations.html    Galerie des simulations : vignettes, filtres par domaine et niveau, vue grille ou liste
 ├── bibliotheque.html   Bibliothèque : ressources et parcours, filtres et recherche
 ├── ressource.html      Page d'une ressource (?id=sim-titrage)
 ├── parcours.html       Parcours guidé en étapes (?id=p-chimie)
@@ -24,6 +25,7 @@ LabVirtyel-Ayiti/
 ├── js/common.js        langue FR/HT, graphiques, curseurs, mode intégré
 ├── js/data.js          CATALOGUE : ressources (simulations, articles, quiz) et parcours
 ├── js/app.js           cartes, quiz, progression (stockée dans le navigateur)
+├── img/sims/          Vignettes des simulations (640 × 360, JPEG). Une par simulation, même nom que le fichier HTML.
 └── sims/
     ├── pendule.html    Physique : pendule simple
     ├── titrage.html    Chimie : titrage acide-base
@@ -63,7 +65,8 @@ Tout se fait dans `js/data.js`, sans toucher aux pages : copiez un bloc existant
 2. Pour chaque texte visible, ajoutez les deux langues : `data-fr="..."` et `data-ht="..."`.
 3. Pour le texte généré en JavaScript, utilisez `LV.t('texte français', 'tèks kreyòl')`, et appelez `LV.onLang(render)` pour redessiner quand la langue change.
 4. Pour relier un curseur, utilisez `LV.bindRange('id', format, fonction)`.
-5. Déclarez-la dans `js/data.js` (type `simulation`, champ `src`) : elle apparaît alors dans la bibliothèque et peut être intégrée à un parcours.
+5. Ajoutez sa vignette dans `img/sims/` (capture de la simulation, 640 × 360) et dans la liste `FILES` de `sw.js`.
+6. Déclarez-la dans `js/data.js` (type `simulation`, champ `src`) : elle apparaît alors dans la bibliothèque et peut être intégrée à un parcours.
 
 ## Règles
 - Pas de bibliothèque externe ni de chargement réseau : tout doit marcher hors ligne.

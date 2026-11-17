@@ -21,6 +21,7 @@
   <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
   <nav>
     <a href="index.html" class="active" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="simulations.html" data-fr="Simulations" data-ht="Simulasyon">Simulations</a>
     <a href="bibliotheque.html" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
     <a href="bibliotheque.html?tab=parcours" data-fr="Parcours" data-ht="Pakou">Parcours</a>
     <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
@@ -30,45 +31,55 @@
 </header>
 
 <main>
-  <section class="home-hero">
-    <p class="eyebrow" data-fr="Laboratoire virtuel · Haïti · par DUVTECH" data-ht="Laboratwa vityèl · Ayiti · pa DUVTECH">Laboratoire virtuel · Haïti · par DUVTECH</p>
-    <h1 data-fr="La salle de sciences gratuite d'Haïti, même sans Internet" data-ht="Sal syans gratis Ayiti a, menm san entènèt">La salle de sciences gratuite d'Haïti, même sans Internet</h1>
-    <p data-fr="Simulations, articles et quiz en français et en kreyòl, organisés en parcours pour l'école classique, l'université, la formation professionnelle et le grand public."
-       data-ht="Simulasyon, atik ak quiz an franse ak an kreyòl, ranje an pakou pou lekòl klasik, inivèsite, fòmasyon pwofesyonèl ak tout moun.">Simulations, articles et quiz en français et en kreyòl, organisés en parcours pour l'école classique, l'université, la formation professionnelle et le grand public.</p>
-    <form class="searchbar" action="bibliotheque.html">
-      <input type="search" name="q" id="q" aria-label="Rechercher">
-      <button type="submit" data-fr="Rechercher" data-ht="Chèche">Rechercher</button>
-    </form>
-    <p style="margin:16px 0 0;font-size:.95rem"><a href="installer.html" data-fr="Installer l'application sur mon téléphone →" data-ht="Enstale aplikasyon an sou telefòn mwen →">Installer l'application sur mon téléphone →</a></p>
+  <section class="ph-hero">
+    <div class="ph-hero-txt">
+      <p class="eyebrow" data-fr="Laboratoire virtuel · Haïti · par DUVTECH" data-ht="Laboratwa vityèl · Ayiti · pa DUVTECH">Laboratoire virtuel · Haïti · par DUVTECH</p>
+      <h1 data-fr="Des simulations interactives gratuites pour apprendre les sciences" data-ht="Simulasyon entèaktif gratis pou aprann syans">Des simulations interactives gratuites pour apprendre les sciences</h1>
+      <p data-fr="Physique, chimie, SVT, électronique, informatique et santé, en français et en kreyòl. Elles marchent même sans Internet, sur ordinateur et sur téléphone."
+         data-ht="Fizik, chimi, syans lavi, elektwonik, enfòmatik ak sante, an franse ak an kreyòl. Yo mache menm san entènèt, sou òdinatè ak sou telefòn.">Physique, chimie, SVT, électronique, informatique et santé, en français et en kreyòl. Elles marchent même sans Internet, sur ordinateur et sur téléphone.</p>
+      <div class="ph-cta">
+        <a class="btn primary big" href="simulations.html" data-fr="Lancer une simulation" data-ht="Lanse yon simulasyon">Lancer une simulation</a>
+        <a class="btn big" href="enseignant.html" data-fr="Pour les enseignants" data-ht="Pou pwofesè yo">Pour les enseignants</a>
+      </div>
+      <p class="ph-install"><a href="installer.html" data-fr="Installer l'application sur mon téléphone →" data-ht="Enstale aplikasyon an sou telefòn mwen →">Installer l'application sur mon téléphone →</a></p>
+    </div>
+    <a class="ph-hero-img" id="hero-sim" href="ressource.html?id=sim-solaire"></a>
   </section>
 
-  <div class="stats" id="stats"></div>
+  <div class="section-head"><h2 data-fr="Simulations par domaine" data-ht="Simulasyon pa domèn">Simulations par domaine</h2></div>
+  <div class="ph-domains" id="domains"></div>
 
   <div id="continue"></div>
 
-  <div class="section-head"><h2 data-fr="Explorer par domaine" data-ht="Eksplore pa domèn">Explorer par domaine</h2></div>
-  <div class="domains" id="domains"></div>
-
   <div class="section-head">
-    <h2 data-fr="Parcours à la une" data-ht="Pakou nou rekòmande">Parcours à la une</h2>
-    <a href="bibliotheque.html?tab=parcours" data-fr="Tous les parcours →" data-ht="Tout pakou yo →">Tous les parcours →</a>
+    <h2 data-fr="Toutes les simulations" data-ht="Tout simulasyon yo">Toutes les simulations</h2>
+    <a href="simulations.html" data-fr="Parcourir et filtrer →" data-ht="Gade epi filtre →">Parcourir et filtrer →</a>
   </div>
-  <div class="cards" id="paths"></div>
+  <div class="sim-grid" id="sims"></div>
 
-  <div class="section-head">
-    <h2 data-fr="Simulations" data-ht="Simulasyon">Simulations</h2>
-    <a href="bibliotheque.html?type=simulation" data-fr="Toute la bibliothèque →" data-ht="Tout bibliyotèk la →">Toute la bibliothèque →</a>
-  </div>
-  <div class="cards" id="sims"></div>
+  <div class="section-head"><h2 data-fr="Par niveau" data-ht="Pa nivo">Par niveau</h2></div>
+  <div class="ph-levels" id="levels"></div>
 
-  <div class="panel harvard">
-    <div>
-      <p class="eyebrow" data-fr="Pour aller plus loin · en ligne" data-ht="Pou ale pi lwen · sou entènèt">Pour aller plus loin · en ligne</p>
-      <h2 data-fr="Catalogue Harvard : 34 000 ressources d'apprentissage et d'enseignement" data-ht="Katalòg Harvard : 34 000 resous pou aprann ak anseye">Catalogue Harvard : 34 000 ressources d'apprentissage et d'enseignement</h2>
-      <p data-fr="Vidéos, simulations, laboratoires virtuels et guides pédagogiques, gratuits, proposés par l'Université Harvard. Nécessite Internet ; contenus surtout en anglais."
-         data-ht="Videyo, simulasyon, laboratwa vityèl ak gid pedagojik, gratis, Inivèsite Harvard ofri yo. Fòk ou gen entènèt ; pifò kontni yo an anglè.">Vidéos, simulations, laboratoires virtuels et guides pédagogiques, gratuits, proposés par l'Université Harvard. Nécessite Internet ; contenus surtout en anglais.</p>
+  <section class="ph-band">
+    <div class="ph-band-head">
+      <h2 data-fr="Pour les enseignants" data-ht="Pou pwofesè yo">Pour les enseignants</h2>
+      <p data-fr="Tout ce qu'il faut pour utiliser les simulations en classe, même sans connexion." data-ht="Tout sa ou bezwen pou itilize simulasyon yo nan klas, menm san koneksyon.">Tout ce qu'il faut pour utiliser les simulations en classe, même sans connexion.</p>
     </div>
-    <a class="btn" href="https://www.labxchange.org/library" target="_blank" rel="noopener" data-fr="Ouvrir le catalogue ↗" data-ht="Louvri katalòg la ↗">Ouvrir le catalogue ↗</a>
+    <div class="ph-feats">
+      <div><b data-fr="Fiches de TP" data-ht="Fich TP">Fiches de TP</b><span data-fr="Chaque simulation s'imprime avec ses objectifs et ses questions." data-ht="Chak simulasyon enprime ak objektif li ak kesyon li yo.">Chaque simulation s'imprime avec ses objectifs et ses questions.</span></div>
+      <div><b data-fr="Parcours guidés" data-ht="Pakou gide">Parcours guidés</b><span data-fr="Article, simulation, puis quiz : une séance prête à l'emploi." data-ht="Atik, simulasyon, apre sa quiz : yon kou ki pare.">Article, simulation, puis quiz : une séance prête à l'emploi.</span></div>
+      <div><b data-fr="Classes sans serveur" data-ht="Klas san sèvè">Classes sans serveur</b><span data-fr="Les élèves envoient leurs résultats par code, même par WhatsApp." data-ht="Elèv yo voye rezilta yo ak yon kòd, menm sou WhatsApp.">Les élèves envoient leurs résultats par code, même par WhatsApp.</span></div>
+    </div>
+    <div class="ph-cta">
+      <a class="btn primary" href="enseignant.html" data-fr="Créer une classe" data-ht="Kreye yon klas">Créer une classe</a>
+      <a class="btn" href="bibliotheque.html?tab=parcours" data-fr="Voir les parcours" data-ht="Gade pakou yo">Voir les parcours</a>
+    </div>
+  </section>
+
+  <div class="ph-why">
+    <div><b data-fr="Français et kreyòl" data-ht="Franse ak kreyòl">Français et kreyòl</b><span data-fr="Un bouton suffit pour changer de langue." data-ht="Yon sèl bouton pou chanje lang.">Un bouton suffit pour changer de langue.</span></div>
+    <div><b data-fr="Sans Internet" data-ht="San entènèt">Sans Internet</b><span data-fr="Après la première visite, tout reste sur l'appareil." data-ht="Apre premye vizit la, tout rete sou aparèy la.">Après la première visite, tout reste sur l'appareil.</span></div>
+    <div><b data-fr="Gratuit" data-ht="Gratis">Gratuit</b><span data-fr="Pour les élèves, les étudiants et les enseignants." data-ht="Pou elèv, etidyan ak pwofesè.">Pour les élèves, les étudiants et les enseignants.</span></div>
   </div>
 </main>
 
@@ -81,18 +92,20 @@
 <script src="js/app.js"></script>
 <script>
 (function () {
-  var D = APP.D;
-  function render() {
-    document.getElementById('q').placeholder = LV.t('Ex. : pendule, LED, épidémie…', 'Egz. : pandil, LED, epidemi…');
+  var D = APP.D, L = APP.L, esc = APP.esc;
+  var sims = D.resources.filter(function (r) { return r.type === 'simulation'; });
 
-    var stats = [
-      [D.resources.length, LV.t('ressources', 'resous')],
-      [D.pathways.length, LV.t('parcours', 'pakou')],
-      [2, LV.t('langues', 'lang')],
-      ['100 %', LV.t('hors ligne', 'san entènèt')]
-    ];
-    document.getElementById('stats').innerHTML = stats.map(function (s) {
-      return '<div class="stat"><b>' + s[0] + '</b><span>' + s[1] + '</span></div>';
+  function render() {
+    var hero = APP.resource('sim-solaire');
+    document.getElementById('hero-sim').innerHTML = '<img src="' + APP.thumb(hero) + '" alt="">' +
+      '<span class="play">' + APP.PLAY + '</span>' +
+      '<span class="cap"><b>' + LV.t('Nouveau', 'Nouvo') + '</b> ' + esc(L(hero.title)) + '</span>';
+
+    document.getElementById('domains').innerHTML = Object.keys(D.domains).map(function (k) {
+      var n = sims.filter(function (r) { return r.domain === k; }).length;
+      return '<a class="ph-domain" style="--dc:' + D.domains[k].color + '" href="simulations.html?domain=' + k + '">' +
+        '<span class="ico">' + APP.domainIcon(k) + '</span><b>' + esc(L(D.domains[k])) + '</b>' +
+        '<small>' + n + ' ' + LV.t(n > 1 ? 'simulations' : 'simulation', 'simulasyon') + '</small></a>';
     }).join('');
 
     /* Parcours commencés mais pas terminés */
@@ -101,14 +114,13 @@
       ? '<div class="section-head"><h2>' + LV.t('Continuer', 'Kontinye') + '</h2></div><div class="cards">' + started.map(APP.pathwayCard).join('') + '</div>'
       : '';
 
-    document.getElementById('domains').innerHTML = Object.keys(D.domains).map(function (k) {
-      var n = D.resources.filter(function (r) { return r.domain === k; }).length;
-      return '<a class="domain-tile" style="--dc:' + D.domains[k].color + '" href="bibliotheque.html?domain=' + k + '"><b>' +
-        APP.esc(APP.L(D.domains[k])) + '</b><small>' + n + ' ' + LV.t('ressources', 'resous') + '</small></a>';
-    }).join('');
+    document.getElementById('sims').innerHTML = sims.map(APP.simTile).join('');
 
-    document.getElementById('paths').innerHTML = D.pathways.slice(0, 3).map(APP.pathwayCard).join('');
-    document.getElementById('sims').innerHTML = D.resources.filter(function (r) { return r.type === 'simulation'; }).slice(0, 3).map(APP.resourceCard).join('');
+    document.getElementById('levels').innerHTML = Object.keys(D.audiences).map(function (k) {
+      var n = sims.filter(function (r) { return r.audiences.indexOf(k) >= 0; }).length;
+      return '<a class="ph-level" href="simulations.html?audience=' + k + '"><b>' + esc(L(D.audiences[k])) + '</b><small>' +
+        n + ' ' + LV.t('simulations', 'simulasyon') + '</small></a>';
+    }).join('');
   }
   LV.onLang(render);
 })();

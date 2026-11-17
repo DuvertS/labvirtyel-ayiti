@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulations · LabVirtyèl Ayiti</title>
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="author" content="DUVTECH">
+<meta name="theme-color" content="#1f3a5f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LabVirtyèl">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="site">
+  <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
+  <nav>
+    <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="simulations.html" class="active" data-fr="Simulations" data-ht="Simulasyon">Simulations</a>
+    <a href="bibliotheque.html" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
+    <a href="bibliotheque.html?tab=parcours" data-fr="Parcours" data-ht="Pakou">Parcours</a>
+    <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
+    <a href="enseignant.html" data-fr="Espace enseignant" data-ht="Espas pwofesè">Espace enseignant</a>
+  </nav>
+  <div class="lang-switch"><button data-lang="fr">Français</button><button data-lang="ht">Kreyòl</button></div>
+</header>
+
+<main>
+  <h1 data-fr="Simulations" data-ht="Simulasyon">Simulations</h1>
+  <p class="subtitle" data-fr="Choisissez un domaine ou un niveau, puis lancez une simulation." data-ht="Chwazi yon domèn oswa yon nivo, epi lanse yon simulasyon.">Choisissez un domaine ou un niveau, puis lancez une simulation.</p>
+
+  <div class="lib">
+    <aside class="filters" id="filters"></aside>
+    <section>
+      <div class="lib-top">
+        <input type="search" id="search" aria-label="Rechercher">
+        <select id="sort" aria-label="Trier"></select>
+        <div class="tabs" id="view">
+          <button data-view="grille" data-fr="Grille" data-ht="Griy">Grille</button>
+          <button data-view="liste" data-fr="Liste" data-ht="Lis">Liste</button>
+        </div>
+      </div>
+      <div class="count" id="count"></div>
+      <div class="sim-grid" id="results"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="site">
+  <span data-fr="LabVirtyèl Ayiti · prototype · usage pédagogique uniquement" data-ht="LabVirtyèl Ayiti · pwototip · pou aprantisaj sèlman">LabVirtyèl Ayiti · prototype · usage pédagogique uniquement</span>
+  <span class="org" data-fr="Un projet DUVTECH · © 2026 DUVTECH" data-ht="Yon pwojè DUVTECH · © 2026 DUVTECH">Un projet DUVTECH · © 2026 DUVTECH</span>
+</footer>
+<script src="js/common.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function () {
+  var D = APP.D, L = APP.L, esc = APP.esc;
+  var sims = D.resources.filter(function (r) { return r.type === 'simulation'; });
+  var VIEW_KEY = 'lv-sim-view';
+  var state = {
+    q: APP.param('q') || '',
+    domain: APP.param('domain') ? [APP.param('domain')] : [],
+    audience: APP.param('audience') ? [APP.param('audience')] : [],
+    level: [],
+    sort: 'alpha',
+    view: (function () { try { return localStorage.getItem(VIEW_KEY) || 'grille'; } catch (e) { return 'grille'; } })()
+  };
+  var search = document.getElementById('search'), sort = document.getElementById('sort');
+  search.value = state.q;
+
+  function group(key, title, dict, withIcon) {
+    var html = '<h3>' + title + '</h3>';
+    Object.keys(dict).forEach(function (k) {
+      var n = sims.filter(function (r) { return key === 'audience' ? r.audiences.indexOf(k) >= 0 : r[key] === k; }).length;
+      html += '<label' + (withIcon ? ' style="--dc:' + dict[k].color + '"' : '') + '><input type="checkbox" data-f="' + key + '" value="' + k + '"' +
+        (state[key].indexOf(k) >= 0 ? ' checked' : '') + '>' +
+        (withIcon ? '<span class="fico">' + APP.domainIcon(k) + '</span>' : '') + esc(L(dict[k])) +
+        '<small class="n">' + n + '</small></label>';
+    });
+    return html;
+  }
+
+  function renderFilters() {
+    var box = document.getElementById('filters');
+    box.innerHTML = group('domain', LV.t('Domaine', 'Domèn'), D.domains, true) +
+      group('audience', LV.t('Niveau scolaire', 'Nivo lekòl'), D.audiences) +
+      group('level', LV.t('Difficulté', 'Difikilte'), D.levels) +
+      '<button class="btn" id="clear">' + LV.t('Effacer les filtres', 'Efase filtè yo') + '</button>';
+    box.querySelectorAll('input').forEach(function (inp) {
+      inp.addEventListener('change', function () {
+        var arr = state[inp.getAttribute('data-f')];
+        if (inp.checked) arr.push(inp.value); else arr.splice(arr.indexOf(inp.value), 1);
+        renderResults();
+      });
+    });
+    document.getElementById('clear').addEventListener('click', function () {
+      state.q = ''; search.value = ''; state.domain = []; state.audience = []; state.level = []; render();
+    });
+  }
+
+  function norm(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function match(r) {
+    if (!state.q) return true;
+    var hay = norm([r.title.fr, r.title.ht, r.summary.fr, r.summary.ht, D.domains[r.domain].fr, D.domains[r.domain].ht].join(' '));
+    return norm(state.q).split(/\s+/).every(function (w) { return hay.indexOf(w) >= 0; });
+  }
+  function inList(list, v) { return !list.length || list.indexOf(v) >= 0; }
+  function anyIn(list, values) { return !list.length || values.some(function (v) { return list.indexOf(v) >= 0; }); }
+
+  function renderResults() {
+    var items = sims.filter(function (r) {
+      return match(r) && inList(state.domain, r.domain) && inList(state.level, r.level) && anyIn(state.audience, r.audiences);
+    });
+    if (state.sort === 'alpha') items.sort(function (a, b) { return L(a.title).localeCompare(L(b.title), 'fr'); });
+    if (state.sort === 'domaine') items.sort(function (a, b) { return L(D.domains[a.domain]).localeCompare(L(D.domains[b.domain]), 'fr'); });
+    if (state.sort === 'duree') items.sort(function (a, b) { return a.minutes - b.minutes; });
+    var res = document.getElementById('results');
+    res.classList.toggle('list', state.view === 'liste');
+    document.getElementById('count').textContent = items.length + ' ' + LV.t(items.length > 1 ? 'simulations' : 'simulation', 'simulasyon');
+    res.innerHTML = items.map(APP.simTile).join('') ||
+      '<div class="empty">' + LV.t('Aucune simulation. Essayez un autre mot ou effacez les filtres.', 'Pa gen simulasyon. Eseye yon lòt mo oswa efase filtè yo.') + '</div>';
+  }
+
+  function render() {
+    search.placeholder = LV.t('Rechercher une simulation…', 'Chèche yon simulasyon…');
+    sort.innerHTML = [['alpha', LV.t('Trier : de A à Z', 'Klase : A rive Z')], ['domaine', LV.t('Trier : par domaine', 'Klase : pa domèn')],
+      ['duree', LV.t('Trier : les plus courtes', 'Klase : pi kout yo')]].map(function (o) {
+      return '<option value="' + o[0] + '"' + (state.sort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+    }).join('');
+    document.querySelectorAll('#view button').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-view') === state.view); });
+    renderFilters();
+    renderResults();
+  }
+
+  search.addEventListener('input', function () { state.q = search.value.trim(); renderResults(); });
+  sort.addEventListener('change', function () { state.sort = sort.value; renderResults(); });
+  document.querySelectorAll('#view button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.view = b.getAttribute('data-view');
+      try { localStorage.setItem(VIEW_KEY, state.view); } catch (e) { /* stockage indisponible */ }
+      render();
+    });
+  });
+  LV.onLang(render);
+})();
+</script>
+</body>
+</html>

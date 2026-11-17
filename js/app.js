@@ -57,6 +57,33 @@ var APP = (function () {
       '<div class="steps-mini">' + bars + '</div></div></a>';
   }
 
+  /* ---------- Vignettes de simulation (style galerie) ---------- */
+  var NEW = ['sim-solaire'];   /* simulations marquées « Nouveau » */
+  function thumb(r) { return r.src.replace('sims/', 'img/sims/').replace('.html', '.jpg'); }
+  var PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M10 8l6 4-6 4z" fill="#fff"/></svg>';
+  function simTile(r) {
+    return '<a class="sim-tile" ' + dc(r.domain) + ' href="ressource.html?id=' + r.id + '">' +
+      '<div class="sim-img"><img src="' + thumb(r) + '" alt="" loading="lazy"><span class="play">' + PLAY + '</span>' +
+      (NEW.indexOf(r.id) >= 0 ? '<span class="badge new">' + LV.t('Nouveau', 'Nouvo') + '</span>' : '') +
+      (isDone(r.id) ? '<span class="badge ok">✓ ' + LV.t('Terminé', 'Fini') + '</span>' : '') + '</div>' +
+      '<div class="sim-txt"><div class="sim-name">' + esc(L(r.title)) + '</div>' +
+      '<div class="sim-dom">' + esc(L(D.domains[r.domain])) + '</div>' +
+      '<p class="sim-sum">' + esc(L(r.summary)) + '</p></div></a>';
+  }
+
+  /* Icônes des domaines */
+  var DOMAIN_ICON = {
+    physique: '<path d="M12 3v4"/><circle cx="12" cy="17" r="3"/><path d="M12 7l0 7"/><path d="M5 3h14"/>',
+    chimie: '<path d="M9 3h6M10 3v6L4.5 18.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3"/><path d="M7 15h10"/>',
+    svt: '<path d="M7 3c0 6 10 6 10 12s-10 6-10 6"/><path d="M17 3c0 6-10 6-10 12"/><path d="M8 7h8M8 17h8"/>',
+    electronique: '<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>',
+    informatique: '<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/>',
+    sante: '<path d="M12 21s-7-4.5-9-9.5C1.7 8 4 4 7.5 4c2 0 3.5 1.2 4.5 2.7C13 5.2 14.5 4 16.5 4 20 4 22.3 8 21 11.5 19 16.5 12 21 12 21z"/><path d="M8 12h2l1.5-2.5L13 14l1.5-2H16"/>'
+  };
+  function domainIcon(k) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + DOMAIN_ICON[k] + '</svg>';
+  }
+
   /* ---------- Contenu d'une ressource (utilisé par ressource.html et parcours.html) ---------- */
   function renderBody(r, el, onDone) {
     if (r.type === 'simulation') {
@@ -119,6 +146,7 @@ var APP = (function () {
   return {
     D: D, L: L, esc: esc, resource: resource, pathway: pathway, pathwaysOf: pathwaysOf, param: param,
     isDone: isDone, markDone: markDone, pathProgress: pathProgress, pathMinutes: pathMinutes, load: load,
-    resourceCard: resourceCard, pathwayCard: pathwayCard, renderBody: renderBody, ICON: ICON
+    resourceCard: resourceCard, pathwayCard: pathwayCard, renderBody: renderBody, ICON: ICON,
+    thumb: thumb, simTile: simTile, domainIcon: domainIcon, PLAY: PLAY
   };
 })();

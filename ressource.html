@@ -21,6 +21,7 @@
   <a class="brand" href="index.html">LabVirtyèl <span>Ayiti</span></a>
   <nav>
     <a href="index.html" data-fr="Accueil" data-ht="Akèy">Accueil</a>
+    <a href="simulations.html" data-fr="Simulations" data-ht="Simulasyon">Simulations</a>
     <a href="bibliotheque.html" class="active" data-fr="Bibliothèque" data-ht="Bibliyotèk">Bibliothèque</a>
     <a href="bibliotheque.html?tab=parcours" data-fr="Parcours" data-ht="Pakou">Parcours</a>
     <a href="etudiant.html" data-fr="Ma classe" data-ht="Klas mwen">Ma classe</a>
@@ -51,6 +52,7 @@
       return;
     }
     document.title = L(r.title) + ' · LabVirtyèl Ayiti';
+    if (r.type === 'simulation') return renderSim();
     var color = D.domains[r.domain].color;
     var paths = APP.pathwaysOf(r.id);
     var related = D.resources.filter(function (x) { return x.domain === r.domain && x.id !== r.id; });
@@ -90,6 +92,88 @@
     APP.renderBody(r, document.getElementById('body'), updateDone);
     document.getElementById('done').addEventListener('click', function () { APP.markDone(r.id); updateDone(); });
     document.getElementById('print').addEventListener('click', function () { window.print(); });
+    updateDone();
+  }
+
+  /* ---------- Page d'une simulation : aperçu, fiche d'information, onglets ---------- */
+  var tab = 'apropos', launched = false;
+
+  function renderSim() {
+    document.querySelectorAll('header.site nav a').forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === 'simulations.html'); });
+    var color = D.domains[r.domain].color;
+    var paths = APP.pathwaysOf(r.id);
+    var others = D.resources.filter(function (x) { return x.domain === r.domain && x.id !== r.id && x.type !== 'simulation'; });
+    var moreSims = D.resources.filter(function (x) { return x.type === 'simulation' && x.id !== r.id; })
+      .sort(function (a, b) { return (b.domain === r.domain) - (a.domain === r.domain); }).slice(0, 4);
+    var link = function (href, title, small) { return '<a href="' + href + '">' + esc(title) + (small ? '<small>' + small + '</small>' : '') + '</a>'; };
+
+    var tabs = {
+      apropos: '<p>' + esc(L(r.summary)) + '</p><h3>' + LV.t('Objectifs d\'apprentissage', 'Objektif aprantisaj') + '</h3><ul>' +
+        r.objectives.map(function (o) { return '<li>' + esc(L(o)) + '</li>'; }).join('') + '</ul>',
+      enseignants: '<ul class="teach">' +
+        '<li><b>' + LV.t('Fiche de TP', 'Fich TP') + '</b> ' + LV.t('Imprimez la fiche avec les objectifs et les questions de la simulation.', 'Enprime fich la ak objektif yo ak kesyon simulasyon an.') +
+          ' <button class="btn" data-print>' + LV.t('Imprimer', 'Enprime') + '</button></li>' +
+        '<li><b>' + LV.t('En classe', 'Nan klas') + '</b> ' + LV.t('Projetez la simulation, faites prédire le résultat aux élèves, puis vérifiez ensemble.', 'Pwojte simulasyon an, fè elèv yo devine rezilta a, epi verifye ansanm.') + '</li>' +
+        '<li><b>' + LV.t('Suivi', 'Swivi') + '</b> ' + LV.t('Assignez le parcours à une classe pour suivre la progression.', 'Bay yon klas pakou a pou swiv pwogrè yo.') +
+          ' <a href="enseignant.html">' + LV.t('Espace enseignant', 'Espas pwofesè') + '</a></li></ul>' +
+        (paths.length ? '<h3>' + LV.t('Parcours qui utilisent cette simulation', 'Pakou ki itilize simulasyon sa a') + '</h3><div class="related">' +
+          paths.map(function (p) { return link('parcours.html?id=' + p.id + '&step=' + p.steps.indexOf(r.id), L(p.title), LV.t('Étape ', 'Etap ') + (p.steps.indexOf(r.id) + 1) + ' / ' + p.steps.length); }).join('') + '</div>' : ''),
+      liees: (others.length ? '<div class="related">' + others.map(function (x) {
+          return link('ressource.html?id=' + x.id, L(x.title), esc(L(D.types[x.type])) + ' · ' + x.minutes + ' min');
+        }).join('') + '</div>' : '') +
+        '<h3>' + LV.t('Autres simulations', 'Lòt simulasyon') + '</h3><div class="sim-grid small">' + moreSims.map(APP.simTile).join('') + '</div>'
+    };
+    var tabNames = { apropos: LV.t('À propos', 'Apwopo'), enseignants: LV.t('Pour les enseignants', 'Pou pwofesè yo'), liees: LV.t('Ressources liées', 'Resous ki gen rapò') };
+
+    page.innerHTML =
+      '<div class="crumbs"><a href="simulations.html">' + LV.t('Simulations', 'Simulasyon') + '</a> › ' +
+        '<a href="simulations.html?domain=' + r.domain + '">' + esc(L(D.domains[r.domain])) + '</a> › ' + esc(L(r.title)) + '</div>' +
+      '<div class="sim-page" style="--dc:' + color + '">' +
+        '<div class="sim-stage" id="stage"></div>' +
+        '<aside class="sim-info">' +
+          '<div class="dom">' + esc(L(D.domains[r.domain])) + '</div>' +
+          '<h1>' + esc(L(r.title)) + '</h1>' +
+          '<dl>' +
+            '<dt>' + LV.t('Niveau scolaire', 'Nivo lekòl') + '</dt><dd>' + r.audiences.map(function (a) { return esc(L(D.audiences[a])); }).join(', ') + '</dd>' +
+            '<dt>' + LV.t('Difficulté', 'Difikilte') + '</dt><dd>' + esc(L(D.levels[r.level])) + '</dd>' +
+            '<dt>' + LV.t('Durée', 'Dire') + '</dt><dd>' + r.minutes + ' min</dd>' +
+            '<dt>' + LV.t('Langues', 'Lang') + '</dt><dd>Français · Kreyòl</dd>' +
+            '<dt>' + LV.t('Sans Internet', 'San entènèt') + '</dt><dd>' + LV.t('Oui', 'Wi') + '</dd>' +
+          '</dl>' +
+          '<button class="btn primary" id="launch">' + LV.t('Lancer la simulation', 'Lanse simulasyon an') + '</button>' +
+          '<a class="btn" href="' + r.src + '?lang=' + LV.lang() + '" target="_blank">' + LV.t('Plein écran ↗', 'Tout ekran ↗') + '</a>' +
+          '<button class="btn" id="done"></button>' +
+        '</aside>' +
+      '</div>' +
+      '<div class="sim-tabs"><div class="tabs" role="tablist">' + Object.keys(tabs).map(function (k) {
+          return '<button data-tab="' + k + '" class="' + (k === tab ? 'active' : '') + '">' + tabNames[k] + '</button>';
+        }).join('') + '</div>' +
+        Object.keys(tabs).map(function (k) {
+          return '<section class="panel tab-panel" data-panel="' + k + '"' + (k === tab ? '' : ' hidden') + '><h2 class="print-only">' + tabNames[k] + '</h2>' + tabs[k] + '</section>';
+        }).join('') + '</div>';
+
+    var stage = document.getElementById('stage');
+    function launch() {
+      launched = true;
+      APP.renderBody(r, stage);
+      stage.classList.add('on');
+    }
+    if (launched) launch();
+    else {
+      stage.innerHTML = '<button class="sim-preview" aria-label="' + esc(LV.t('Lancer la simulation', 'Lanse simulasyon an')) + '"><img src="' + APP.thumb(r) + '" alt="">' +
+        '<span class="play">' + APP.PLAY + '</span><span class="cap">' + LV.t('Lancer la simulation', 'Lanse simulasyon an') + '</span></button>';
+      stage.querySelector('.sim-preview').addEventListener('click', launch);
+    }
+    document.getElementById('launch').addEventListener('click', function () { if (!launched) launch(); stage.scrollIntoView({ behavior: 'smooth' }); });
+    document.getElementById('done').addEventListener('click', function () { APP.markDone(r.id); updateDone(); });
+    page.querySelectorAll('[data-print]').forEach(function (b) { b.addEventListener('click', function () { window.print(); }); });
+    page.querySelectorAll('.sim-tabs .tabs button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        tab = b.getAttribute('data-tab');
+        page.querySelectorAll('.sim-tabs .tabs button').forEach(function (x) { x.classList.toggle('active', x === b); });
+        page.querySelectorAll('.tab-panel').forEach(function (p) { p.hidden = p.getAttribute('data-panel') !== tab; });
+      });
+    });
     updateDone();
   }
 
