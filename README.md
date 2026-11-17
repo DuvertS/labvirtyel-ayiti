@@ -4,6 +4,8 @@ Un projet **DUVTECH**.
 
 Un laboratoire virtuel bilingue (français et kreyòl) qui fonctionne **sans Internet et sans serveur**.
 
+Publics : écoles classiques (3e cycle du fondamental et secondaire), universités, formation professionnelle et grand public. L'accueil renvoie aussi vers le catalogue Harvard de 34 000 ressources d'apprentissage et d'enseignement (en ligne, surtout en anglais).
+
 ## Lancer le prototype
 Double-cliquez sur `index.html`, ou copiez le dossier sur une clé USB ou un téléphone et ouvrez `index.html` dans le navigateur.
 

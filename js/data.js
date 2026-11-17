@@ -21,6 +21,7 @@ var LV_DATA = {
     intermediaire: { fr: 'Intermédiaire', ht: 'Mwayen' }
   },
   audiences: {
+    ecole:      { fr: 'École classique',            ht: 'Lekòl klasik' },
     universite: { fr: 'Université',                 ht: 'Inivèsite' },
     pro:        { fr: 'Formation professionnelle',  ht: 'Fòmasyon pwofesyonèl' },
     public:     { fr: 'Grand public',               ht: 'Tout moun' }
@@ -28,7 +29,7 @@ var LV_DATA = {
 
   resources: [
     /* ---------------- PHYSIQUE ---------------- */
-    { id: 'art-pendule', type: 'article', domain: 'physique', level: 'initiation', audiences: ['universite', 'public'], minutes: 5,
+    { id: 'art-pendule', type: 'article', domain: 'physique', level: 'initiation', audiences: ['ecole', 'universite', 'public'], minutes: 5,
       title: { fr: 'Le pendule et la mesure du temps', ht: 'Pandil la ak fason pou mezire tan' },
       summary: { fr: 'Pourquoi un pendule bat-il toujours au même rythme ?', ht: 'Poukisa yon pandil toujou bat menm ritm ?' },
       body: {
@@ -36,11 +37,11 @@ var LV_DATA = {
         ht: '<p>Yon pandil senp se yon mas ki pandye nan yon fil. Lè ou deplase l epi ou lage l, li balanse de bò lòt bò vètikal la.</p><p><b>Peryòd</b> T a se tan yon ale-retou konplè pran. Pou ti ang, li pa depann ni de mas la ni de ang depa a. Li depann sèlman de longè fil la L ak gravite g :</p><p><span class="formula">T₀ = 2π √(L / g)</span></p><p>Se regilarite sa a ki te pèmèt yo fè premye revèy egzak yo. Sou Lalin, kote g sis fwa pi fèb, menm pandil la balanse anviwon 2,5 fwa pi dousman.</p>'
       },
       objectives: [{ fr: 'Définir la période d\'un pendule', ht: 'Defini peryòd yon pandil' }, { fr: 'Connaître la formule T₀ = 2π√(L/g)', ht: 'Konnen fòmil T₀ = 2π√(L/g)' }] },
-    { id: 'sim-pendule', type: 'simulation', domain: 'physique', level: 'initiation', audiences: ['universite', 'public'], minutes: 15, src: 'sims/pendule.html',
+    { id: 'sim-pendule', type: 'simulation', domain: 'physique', level: 'initiation', audiences: ['ecole', 'universite', 'public'], minutes: 15, src: 'sims/pendule.html',
       title: { fr: 'Pendule simple', ht: 'Pandil senp' },
       summary: { fr: 'Mesurez la période sur Terre, sur la Lune et sur Mars.', ht: 'Mezire peryòd la sou Latè, sou Lalin ak sou Mas.' },
       objectives: [{ fr: 'Mesurer une période', ht: 'Mezire yon peryòd' }, { fr: 'Comparer la mesure à la théorie', ht: 'Konpare mezi a ak teyori a' }, { fr: 'Étudier l\'effet de L et de g', ht: 'Etidye efè L ak g' }] },
-    { id: 'quiz-pendule', type: 'quiz', domain: 'physique', level: 'initiation', audiences: ['universite', 'public'], minutes: 5,
+    { id: 'quiz-pendule', type: 'quiz', domain: 'physique', level: 'initiation', audiences: ['ecole', 'universite', 'public'], minutes: 5,
       title: { fr: 'Quiz : le pendule', ht: 'Quiz : pandil la' },
       summary: { fr: '3 questions pour vérifier vos acquis.', ht: '3 kesyon pou verifye sa w aprann.' },
       questions: [
@@ -56,7 +57,7 @@ var LV_DATA = {
       ] },
 
     /* ---------------- CHIMIE ---------------- */
-    { id: 'art-titrage', type: 'article', domain: 'chimie', level: 'intermediaire', audiences: ['universite', 'pro'], minutes: 5,
+    { id: 'art-titrage', type: 'article', domain: 'chimie', level: 'intermediaire', audiences: ['ecole', 'universite', 'pro'], minutes: 5,
       title: { fr: 'Doser un acide : le titrage', ht: 'Mezire yon asid : titraj' },
       summary: { fr: 'Comment trouver une concentration inconnue avec une burette.', ht: 'Kijan pou jwenn yon konsantrasyon ou pa konnen ak yon birèt.' },
       body: {
@@ -64,11 +65,11 @@ var LV_DATA = {
         ht: '<p>Yon <b>titraj</b> pèmèt nou jwenn konsantrasyon yon solisyon nou pa konnen. Nou ajoute ladan l, ti kras pa ti kras, yon solisyon nou konnen konsantrasyon l, ki reyaji avè l.</p><p>Pou yon asid fò tankou HCl nou mezire ak soud NaOH, reyaksyon an se H₃O⁺ + OH⁻ → 2 H₂O. Nan <b>ekivalans</b>, kantite asid ak kantite baz egal :</p><p><span class="formula">C<sub>a</sub> · V<sub>a</sub> = C<sub>b</sub> · V<sub>éq</sub></span></p><p>Nou wè ekivalans lan lè pH a sote toudenkou (pH = 7 pou yon asid fò ak yon baz fò), oswa lè yon endikatè chanje koulè. Laboratwa kontwòl kalite sèvi ak teknik sa a pou dlo, manje ak medikaman.</p>'
       },
       objectives: [{ fr: 'Définir l\'équivalence', ht: 'Defini ekivalans' }, { fr: 'Écrire la relation Ca·Va = Cb·Véq', ht: 'Ekri relasyon Ca·Va = Cb·Véq' }] },
-    { id: 'sim-titrage', type: 'simulation', domain: 'chimie', level: 'intermediaire', audiences: ['universite', 'pro'], minutes: 20, src: 'sims/titrage.html',
+    { id: 'sim-titrage', type: 'simulation', domain: 'chimie', level: 'intermediaire', audiences: ['ecole', 'universite', 'pro'], minutes: 20, src: 'sims/titrage.html',
       title: { fr: 'Titrage acide-base', ht: 'Titraj asid-baz' },
       summary: { fr: 'Versez la soude, tracez la courbe de pH, trouvez l\'équivalence.', ht: 'Vide soud la, trase koub pH a, jwenn ekivalans lan.' },
       objectives: [{ fr: 'Tracer une courbe de titrage', ht: 'Trase yon koub titraj' }, { fr: 'Repérer l\'équivalence', ht: 'Jwenn ekivalans lan' }, { fr: 'Choisir un indicateur coloré', ht: 'Chwazi yon endikatè koulè' }] },
-    { id: 'quiz-titrage', type: 'quiz', domain: 'chimie', level: 'intermediaire', audiences: ['universite', 'pro'], minutes: 5,
+    { id: 'quiz-titrage', type: 'quiz', domain: 'chimie', level: 'intermediaire', audiences: ['ecole', 'universite', 'pro'], minutes: 5,
       title: { fr: 'Quiz : le titrage', ht: 'Quiz : titraj' },
       summary: { fr: '3 questions dont un calcul de concentration.', ht: '3 kesyon, ladan yo gen yon kalkil konsantrasyon.' },
       questions: [
@@ -84,7 +85,7 @@ var LV_DATA = {
       ] },
 
     /* ---------------- SVT ---------------- */
-    { id: 'art-mendel', type: 'article', domain: 'svt', level: 'initiation', audiences: ['universite', 'public'], minutes: 5,
+    { id: 'art-mendel', type: 'article', domain: 'svt', level: 'initiation', audiences: ['ecole', 'universite', 'public'], minutes: 5,
       title: { fr: 'Mendel et les lois de l\'hérédité', ht: 'Mendel ak lwa eredite yo' },
       summary: { fr: 'Comment les caractères passent des parents aux enfants.', ht: 'Kijan karaktè yo pase soti nan paran rive nan pitit.' },
       body: {
@@ -92,11 +93,11 @@ var LV_DATA = {
         ht: '<p>Nan 19yèm syèk la, Gregor Mendel te kwaze plizyè milye plant pwa. Li te montre chak karaktè, tankou koulè flè yo, depann de yon <b>jèn</b> ki la an de egzanplè, yo rele yo <b>alèl</b>.</p><p>Chak paran bay yon sèl nan de alèl li yo, o aza. Yon alèl <b>dominan</b> (A) parèt depi li la. Yon alèl <b>resesif</b> (a) parèt sèlman si li an doub (aa).</p><p>Lè nou kwaze de paran Aa, an mwayèn nou jwenn ¼ AA, ½ Aa ak ¼ aa, sa vle di 3 plant vyolèt pou 1 blan. <b>Tablo Punnett</b> la pèmèt nou prevwa pwopòsyon sa yo. Moun k ap seleksyone semans ak doktè jenetik toujou sèvi avè l jodi a.</p>'
       },
       objectives: [{ fr: 'Distinguer gène et allèle', ht: 'Fè diferans ant jèn ak alèl' }, { fr: 'Comprendre dominance et récessivité', ht: 'Konprann dominan ak resesif' }] },
-    { id: 'sim-mendel', type: 'simulation', domain: 'svt', level: 'initiation', audiences: ['universite', 'public'], minutes: 15, src: 'sims/mendel.html',
+    { id: 'sim-mendel', type: 'simulation', domain: 'svt', level: 'initiation', audiences: ['ecole', 'universite', 'public'], minutes: 15, src: 'sims/mendel.html',
       title: { fr: 'Croisements de Mendel', ht: 'Kwazman Mendel' },
       summary: { fr: 'Remplissez l\'échiquier de Punnett et comparez théorie et descendance.', ht: 'Ranpli tablo Punnett la epi konpare teyori ak pitit yo.' },
       objectives: [{ fr: 'Construire un échiquier de Punnett', ht: 'Fè yon tablo Punnett' }, { fr: 'Comparer probabilité et observation', ht: 'Konpare pwobabilite ak obsèvasyon' }] },
-    { id: 'quiz-mendel', type: 'quiz', domain: 'svt', level: 'initiation', audiences: ['universite', 'public'], minutes: 5,
+    { id: 'quiz-mendel', type: 'quiz', domain: 'svt', level: 'initiation', audiences: ['ecole', 'universite', 'public'], minutes: 5,
       title: { fr: 'Quiz : hérédité', ht: 'Quiz : eredite' },
       summary: { fr: '3 questions sur les croisements.', ht: '3 kesyon sou kwazman.' },
       questions: [
@@ -112,7 +113,7 @@ var LV_DATA = {
       ] },
 
     /* ---------------- PHYSIQUE · ÉNERGIE SOLAIRE ---------------- */
-    { id: 'art-solaire', type: 'article', domain: 'physique', level: 'initiation', audiences: ['universite', 'pro', 'public'], minutes: 6,
+    { id: 'art-solaire', type: 'article', domain: 'physique', level: 'initiation', audiences: ['ecole', 'universite', 'pro', 'public'], minutes: 6,
       title: { fr: 'L\'énergie solaire en Haïti', ht: 'Enèji solè ann Ayiti' },
       summary: { fr: 'Comment un panneau transforme la lumière en électricité.', ht: 'Kijan yon panno chanje limyè an kouran.' },
       body: {
@@ -120,11 +121,11 @@ var LV_DATA = {
         ht: '<p>Yon <b>selil fotovoltayik</b> se yon ti plak silisyòm fen. Lè limyè frape l, li fè elektwon yo deplase : sa bay kouran. Yon panno nòmal mete 36 oswa 60 selil youn dèyè lòt pou jwenn yon vòltaj ki itil.</p><p>Pisans yon panno bay an <b>wat pik (Wp)</b> : se sa li bay anba yon solèy fò (1000 W/m²) a 25 °C. An reyalite :</p><ul><li>mwens limyè (nwaj, lonbraj, maten ak aswè) bay <b>mwens kouran</b> ;</li><li>chalè fè <b>vòltaj</b> la bese : yon panno a 65 °C pèdi anviwon 15 % nan pisans li ;</li><li>pisans lan depann de vòltaj travay la : yon regilatè <b>MPPT</b> jwenn pi bon pwen an.</li></ul><p>Ayiti resevwa an mwayèn 5 a 6 èdtan bon solèy chak jou. Yon panno 100 Wp bay anviwon <span class="formula">100 × 5,5 × 0,75 ≈ 410 Wh pa jou</span>, sa ase pou klere yon kay ak anpoul LED epi chaje plizyè telefòn. Aswè, enèji a soti nan yon <b>batri</b> ki chaje pandan lajounen.</p>'
       },
       objectives: [{ fr: 'Expliquer l\'effet photovoltaïque', ht: 'Eksplike efè fotovoltayik la' }, { fr: 'Estimer la production d\'un panneau', ht: 'Estime konbyen yon panno pwodui' }] },
-    { id: 'sim-solaire', type: 'simulation', domain: 'physique', level: 'initiation', audiences: ['universite', 'pro', 'public'], minutes: 20, src: 'sims/solaire.html',
+    { id: 'sim-solaire', type: 'simulation', domain: 'physique', level: 'initiation', audiences: ['ecole', 'universite', 'pro', 'public'], minutes: 20, src: 'sims/solaire.html',
       title: { fr: 'Panneau solaire', ht: 'Panno solè' },
       summary: { fr: 'Soleil, chaleur, tension : produisez assez pour une maison.', ht: 'Solèy, chalè, vòltaj : pwodui ase pou yon kay.' },
       objectives: [{ fr: 'Lire les courbes I-V et P-V', ht: 'Li koub I-V ak P-V yo' }, { fr: 'Trouver le point de puissance maximale', ht: 'Jwenn pwen pisans maksimòm lan' }, { fr: 'Dimensionner une petite installation', ht: 'Kalkile yon ti enstalasyon' }] },
-    { id: 'quiz-solaire', type: 'quiz', domain: 'physique', level: 'initiation', audiences: ['universite', 'pro', 'public'], minutes: 5,
+    { id: 'quiz-solaire', type: 'quiz', domain: 'physique', level: 'initiation', audiences: ['ecole', 'universite', 'pro', 'public'], minutes: 5,
       title: { fr: 'Quiz : énergie solaire', ht: 'Quiz : enèji solè' },
       summary: { fr: '4 questions sur les panneaux et le bilan d\'énergie.', ht: '4 kesyon sou panno ak bilan enèji.' },
       questions: [
@@ -143,7 +144,7 @@ var LV_DATA = {
       ] },
 
     /* ---------------- ÉLECTRONIQUE ---------------- */
-    { id: 'art-ohm', type: 'article', domain: 'electronique', level: 'initiation', audiences: ['pro', 'public'], minutes: 5,
+    { id: 'art-ohm', type: 'article', domain: 'electronique', level: 'initiation', audiences: ['ecole', 'pro', 'public'], minutes: 5,
       title: { fr: 'Loi d\'Ohm et protection d\'une LED', ht: 'Lwa Ohm ak pwoteksyon yon LED' },
       summary: { fr: 'Pourquoi chaque LED a besoin de sa résistance.', ht: 'Poukisa chak LED bezwen rezistans pa l.' },
       body: {
@@ -151,11 +152,11 @@ var LV_DATA = {
         ht: '<p><b>Lwa Ohm</b> mete ansanm vòltaj U (an vòlt), kouran I (an anpè) ak rezistans R (an òm) : <span class="formula">U = R · I</span></p><p>Yon LED pa tankou yon rezistans : li kenbe yon vòltaj prèske fiks, <b>papòt</b> li (anviwon 2 V pou yon LED wouj, 3,2 V pou yon LED ble). Si ou konekte l dirèkteman sou yon pil, kouran an vin twò fò epi li boule.</p><p>Se poutèt sa nou mete yon rezistans an seri, ki « pran » rès vòltaj la : <span class="formula">R = (U − U<sub>LED</sub>) / I</span></p><p>Se kalkil debaz tout elektrisyen k ap enstale limyè LED sou yon panno solè oswa yon batri 12 V.</p>'
       },
       objectives: [{ fr: 'Appliquer U = R·I', ht: 'Aplike U = R·I' }, { fr: 'Calculer une résistance de protection', ht: 'Kalkile yon rezistans pwoteksyon' }] },
-    { id: 'sim-ohm', type: 'simulation', domain: 'electronique', level: 'initiation', audiences: ['pro', 'public'], minutes: 15, src: 'sims/ohm.html',
+    { id: 'sim-ohm', type: 'simulation', domain: 'electronique', level: 'initiation', audiences: ['ecole', 'pro', 'public'], minutes: 15, src: 'sims/ohm.html',
       title: { fr: 'Loi d\'Ohm et LED', ht: 'Lwa Ohm ak LED' },
       summary: { fr: 'Allumez une LED sans la griller.', ht: 'Limen yon LED san w pa boule l.' },
       objectives: [{ fr: 'Mesurer un courant', ht: 'Mezire yon kouran' }, { fr: 'Choisir une résistance adaptée', ht: 'Chwazi bon rezistans lan' }] },
-    { id: 'quiz-ohm', type: 'quiz', domain: 'electronique', level: 'initiation', audiences: ['pro', 'public'], minutes: 5,
+    { id: 'quiz-ohm', type: 'quiz', domain: 'electronique', level: 'initiation', audiences: ['ecole', 'pro', 'public'], minutes: 5,
       title: { fr: 'Quiz : loi d\'Ohm', ht: 'Quiz : lwa Ohm' },
       summary: { fr: '3 questions de calcul.', ht: '3 kesyon kalkil.' },
       questions: [
@@ -171,7 +172,7 @@ var LV_DATA = {
       ] },
 
     /* ---------------- INFORMATIQUE ---------------- */
-    { id: 'art-logique', type: 'article', domain: 'informatique', level: 'initiation', audiences: ['universite', 'pro', 'public'], minutes: 5,
+    { id: 'art-logique', type: 'article', domain: 'informatique', level: 'initiation', audiences: ['ecole', 'universite', 'pro', 'public'], minutes: 5,
       title: { fr: 'Les 0 et les 1 : logique booléenne', ht: '0 ak 1 yo : lojik booleyen' },
       summary: { fr: 'Comment un ordinateur décide avec des portes logiques.', ht: 'Kijan yon òdinatè pran desizyon ak pòt lojik.' },
       body: {
@@ -179,11 +180,11 @@ var LV_DATA = {
         ht: '<p>Yon òdinatè konnen sèlman de valè : <b>0</b> (pa gen kouran) ak <b>1</b> (gen kouran). <b>Pòt lojik</b> yo se ti sikui ki konbine valè sa yo.</p><ul><li><b>AK</b> : 1 sèlman si tout antre yo vo 1.</li><li><b>OUBYEN</b> : 1 si omwen yon antre vo 1.</li><li><b>NON</b> : bay kontrè antre a.</li><li><b>OUBYEN eksklizif</b> : 1 si antre yo diferan.</li></ul><p>Lè nou mete plizyè milyon pòt ansanm, nou jwenn yon pwosesè ki ka fè adisyon, konpare ak sere enfòmasyon. Pòt NON-AK la sifi pou kont li pou fè tout lòt pòt yo.</p>'
       },
       objectives: [{ fr: 'Connaître les portes de base', ht: 'Konnen pòt debaz yo' }, { fr: 'Lire une table de vérité', ht: 'Li yon tab verite' }] },
-    { id: 'sim-logique', type: 'simulation', domain: 'informatique', level: 'initiation', audiences: ['universite', 'pro', 'public'], minutes: 10, src: 'sims/logique.html',
+    { id: 'sim-logique', type: 'simulation', domain: 'informatique', level: 'initiation', audiences: ['ecole', 'universite', 'pro', 'public'], minutes: 10, src: 'sims/logique.html',
       title: { fr: 'Portes logiques', ht: 'Pòt lojik' },
       summary: { fr: 'Testez ET, OU, NON, NON-ET, NON-OU et OU exclusif.', ht: 'Teste AK, OUBYEN, NON, NON-AK, NON-OUBYEN ak OUBYEN eksklizif.' },
       objectives: [{ fr: 'Construire une table de vérité', ht: 'Fè yon tab verite' }] },
-    { id: 'quiz-logique', type: 'quiz', domain: 'informatique', level: 'initiation', audiences: ['universite', 'pro', 'public'], minutes: 5,
+    { id: 'quiz-logique', type: 'quiz', domain: 'informatique', level: 'initiation', audiences: ['ecole', 'universite', 'pro', 'public'], minutes: 5,
       title: { fr: 'Quiz : portes logiques', ht: 'Quiz : pòt lojik' },
       summary: { fr: '3 questions rapides.', ht: '3 kesyon rapid.' },
       questions: [
@@ -199,7 +200,7 @@ var LV_DATA = {
       ] },
 
     /* ---------------- SANTÉ ---------------- */
-    { id: 'art-sir', type: 'article', domain: 'sante', level: 'intermediaire', audiences: ['universite', 'pro', 'public'], minutes: 6,
+    { id: 'art-sir', type: 'article', domain: 'sante', level: 'intermediaire', audiences: ['ecole', 'universite', 'pro', 'public'], minutes: 6,
       title: { fr: 'Comprendre une épidémie : le modèle SIR', ht: 'Konprann yon epidemi : modèl SIR' },
       summary: { fr: 'R₀, pic épidémique et immunité collective.', ht: 'R₀, pi gwo pwen epidemi an ak iminite kolektif.' },
       body: {
@@ -207,11 +208,11 @@ var LV_DATA = {
         ht: '<p>Modèl <b>SIR</b> la separe popilasyon an an twa gwoup : moun ki an <b>S</b>ante (ki ka tonbe malad), moun ki <b>I</b>nfekte (enfekte) ak moun ki <b>R</b>etabli (geri oswa pwoteje).</p><p>Chif kle a se <b>R₀</b> : konbyen moun yon malad bay maladi a an mwayèn nan yon popilasyon ki pa pwoteje. Si R₀ &gt; 1, epidemi an grandi. Si R₀ &lt; 1, li mouri.</p><p>Lè yon pati v nan popilasyon an pran vaksen, R efektif la bese : <span class="formula">R<sub>eff</sub> = R₀ × (1 − v)</span>. Epidemi an kanpe lè v depase 1 − 1/R₀ : se <b>iminite kolektif</b>.</p><p>Dlo potab, lave men ak izole malad yo fè R₀ bese tou. Ann Ayiti, se sa ki te pèmèt kolera a rekile.</p><p><i>Modèl senplifye pou aprantisaj. Li pa ranplase konsèy doktè.</i></p>'
       },
       objectives: [{ fr: 'Définir R₀', ht: 'Defini R₀' }, { fr: 'Calculer le seuil d\'immunité collective', ht: 'Kalkile papòt iminite kolektif' }] },
-    { id: 'sim-sir', type: 'simulation', domain: 'sante', level: 'intermediaire', audiences: ['universite', 'pro', 'public'], minutes: 15, src: 'sims/sir.html',
+    { id: 'sim-sir', type: 'simulation', domain: 'sante', level: 'intermediaire', audiences: ['ecole', 'universite', 'pro', 'public'], minutes: 15, src: 'sims/sir.html',
       title: { fr: 'Propagation d\'une épidémie', ht: 'Kijan yon epidemi gaye' },
       summary: { fr: 'Changez R₀ et la vaccination, observez le pic.', ht: 'Chanje R₀ ak vaksinasyon, gade pi gwo pwen an.' },
       objectives: [{ fr: 'Lire des courbes S, I, R', ht: 'Li koub S, I, R' }, { fr: 'Mesurer l\'effet de la vaccination', ht: 'Mezire efè vaksinasyon' }] },
-    { id: 'quiz-sir', type: 'quiz', domain: 'sante', level: 'intermediaire', audiences: ['universite', 'pro', 'public'], minutes: 5,
+    { id: 'quiz-sir', type: 'quiz', domain: 'sante', level: 'intermediaire', audiences: ['ecole', 'universite', 'pro', 'public'], minutes: 5,
       title: { fr: 'Quiz : épidémies', ht: 'Quiz : epidemi' },
       summary: { fr: '3 questions sur R₀ et la vaccination.', ht: '3 kesyon sou R₀ ak vaksinasyon.' },
       questions: [
@@ -228,31 +229,31 @@ var LV_DATA = {
   ],
 
   pathways: [
-    { id: 'p-physique', domain: 'physique', level: 'initiation', audiences: ['universite', 'public'],
+    { id: 'p-physique', domain: 'physique', level: 'initiation', audiences: ['ecole', 'universite', 'public'],
       title: { fr: 'Le temps et les oscillations', ht: 'Tan ak osilasyon' },
       summary: { fr: 'Du pendule à l\'horloge : comprendre et mesurer une période.', ht: 'Soti nan pandil rive nan revèy : konprann epi mezire yon peryòd.' },
       steps: ['art-pendule', 'sim-pendule', 'quiz-pendule'] },
-    { id: 'p-solaire', domain: 'physique', level: 'initiation', audiences: ['universite', 'pro', 'public'],
+    { id: 'p-solaire', domain: 'physique', level: 'initiation', audiences: ['ecole', 'universite', 'pro', 'public'],
       title: { fr: 'L\'électricité du soleil', ht: 'Kouran ki soti nan solèy' },
       summary: { fr: 'Comprendre un panneau solaire et équiper une maison.', ht: 'Konprann yon panno solè epi ekipe yon kay.' },
       steps: ['art-solaire', 'sim-solaire', 'quiz-solaire'] },
-    { id: 'p-chimie', domain: 'chimie', level: 'intermediaire', audiences: ['universite', 'pro'],
+    { id: 'p-chimie', domain: 'chimie', level: 'intermediaire', audiences: ['ecole', 'universite', 'pro'],
       title: { fr: 'Contrôle qualité : doser un acide', ht: 'Kontwòl kalite : mezire yon asid' },
       summary: { fr: 'La technique du titrage, de la théorie au calcul de concentration.', ht: 'Teknik titraj la, soti nan teyori rive nan kalkil konsantrasyon.' },
       steps: ['art-titrage', 'sim-titrage', 'quiz-titrage'] },
-    { id: 'p-svt', domain: 'svt', level: 'initiation', audiences: ['universite', 'public'],
+    { id: 'p-svt', domain: 'svt', level: 'initiation', audiences: ['ecole', 'universite', 'public'],
       title: { fr: 'Hérédité : sur les traces de Mendel', ht: 'Eredite : sou tras Mendel' },
       summary: { fr: 'Gènes, allèles et probabilités dans les croisements.', ht: 'Jèn, alèl ak pwobabilite nan kwazman.' },
       steps: ['art-mendel', 'sim-mendel', 'quiz-mendel'] },
-    { id: 'p-electronique', domain: 'electronique', level: 'initiation', audiences: ['pro', 'public'],
+    { id: 'p-electronique', domain: 'electronique', level: 'initiation', audiences: ['ecole', 'pro', 'public'],
       title: { fr: 'Électricité solaire : bien câbler une LED', ht: 'Elektrisite solè : byen konekte yon LED' },
       summary: { fr: 'La loi d\'Ohm appliquée à l\'éclairage solaire.', ht: 'Lwa Ohm aplike sou limyè solè.' },
       steps: ['art-ohm', 'sim-ohm', 'quiz-ohm'] },
-    { id: 'p-informatique', domain: 'informatique', level: 'initiation', audiences: ['universite', 'pro', 'public'],
+    { id: 'p-informatique', domain: 'informatique', level: 'initiation', audiences: ['ecole', 'universite', 'pro', 'public'],
       title: { fr: 'Dans le cerveau d\'un ordinateur', ht: 'Anndan sèvo yon òdinatè' },
       summary: { fr: 'Les portes logiques, briques de base du numérique.', ht: 'Pòt lojik yo, brik debaz nimerik la.' },
       steps: ['art-logique', 'sim-logique', 'quiz-logique'] },
-    { id: 'p-sante', domain: 'sante', level: 'intermediaire', audiences: ['universite', 'pro', 'public'],
+    { id: 'p-sante', domain: 'sante', level: 'intermediaire', audiences: ['ecole', 'universite', 'pro', 'public'],
       title: { fr: 'Santé publique : arrêter une épidémie', ht: 'Sante piblik : kanpe yon epidemi' },
       summary: { fr: 'R₀, vaccination et immunité collective avec le modèle SIR.', ht: 'R₀, vaksinasyon ak iminite kolektif ak modèl SIR.' },
       steps: ['art-sir', 'sim-sir', 'quiz-sir'] }

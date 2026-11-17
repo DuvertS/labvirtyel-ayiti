@@ -23,6 +23,11 @@ header.site nav a.active { color: var(--accent); font-weight: 700; }
 .stat span { font-size: .85rem; color: var(--muted); }
 .section-head { display: flex; justify-content: space-between; align-items: baseline; margin: 28px 0 12px; gap: 12px; }
 .section-head h2 { margin: 0; font-size: 1.3rem; }
+.harvard { display: flex; gap: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-top: 32px; border-left: 5px solid var(--red); }
+.harvard > div { flex: 1 1 420px; }
+.harvard h2 { font-size: 1.15rem; margin: 0 0 6px; }
+.harvard p { margin: 0; color: var(--muted); }
+.harvard .eyebrow { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--red); font-weight: 700; margin-bottom: 6px; }
 .domains { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 .domain-tile { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: var(--radius); text-decoration: none;
   color: var(--text); background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--dc); transition: border-color .15s; }

@@ -50,7 +50,7 @@
     { id: 'contraste', fr: 'Contraste élevé', ht: 'Gwo kontras', dfr: 'Lisibilité maximale', dht: 'Pi fasil pou li' }
   ];
   var ROLES = [
-    ['etudiant', 'Étudiant(e)', 'Etidyan'], ['enseignant', 'Enseignant(e)', 'Pwofesè'],
+    ['eleve', 'Élève (école classique)', 'Elèv (lekòl klasik)'], ['etudiant', 'Étudiant(e)', 'Etidyan'], ['enseignant', 'Enseignant(e)', 'Pwofesè'],
     ['formateur', 'Formateur / formatrice', 'Fòmatè'], ['public', 'Grand public', 'Piblik']
   ];
 
@@ -130,7 +130,7 @@
     var el = document.getElementById('rolehint');
     el.innerHTML = r === 'enseignant' || r === 'formateur'
       ? LV.t('Accédez à votre ', 'Ale nan ') + '<a href="enseignant.html">' + LV.t('espace enseignant', 'espas pwofesè') + '</a>.'
-      : (r === 'etudiant' ? LV.t('Rejoignez votre classe dans ', 'Antre nan klas ou nan ') + '<a href="etudiant.html">' + LV.t('Ma classe', 'Klas mwen') + '</a>.' : '');
+      : (r === 'etudiant' || r === 'eleve' ? LV.t('Rejoignez votre classe dans ', 'Antre nan klas ou nan ') + '<a href="etudiant.html">' + LV.t('Ma classe', 'Klas mwen') + '</a>.' : '');
   }
 
   var savedTimer = null;

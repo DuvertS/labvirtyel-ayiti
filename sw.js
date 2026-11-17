@@ -3,7 +3,7 @@
    IMPORTANT : à chaque modification du site, augmentez VERSION pour que les téléphones
    téléchargent la nouvelle version. */
 
-var VERSION = 'lv-v4';
+var VERSION = 'lv-v5';
 var FILES = [
   './',
   'index.html', 'bibliotheque.html', 'ressource.html', 'parcours.html', 'etudiant.html', 'enseignant.html', 'installer.html', 'profil.html',
