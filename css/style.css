@@ -139,6 +139,7 @@ table.tt tr.on td { background: var(--accent-soft); font-weight: 700; }
 .embed body { background: transparent; }
 
 footer.site { text-align: center; color: var(--muted); font-size: .8rem; padding: 24px 16px; }
+footer.site .org { display: block; margin-top: 4px; font-weight: 600; letter-spacing: .04em; }
 
 /* Application installable */
 .install-btn { font: inherit; font-size: .85rem; font-weight: 700; padding: 5px 12px; border-radius: var(--radius); cursor: pointer;

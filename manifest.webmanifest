@@ -1,7 +1,7 @@
 {
   "name": "LabVirtyèl Ayiti",
   "short_name": "LabVirtyèl",
-  "description": "Laboratoire virtuel gratuit en français et en kreyòl : simulations, articles, quiz et parcours, même sans Internet.",
+  "description": "Laboratoire virtuel gratuit en français et en kreyòl : simulations, articles, quiz et parcours, même sans Internet. Un projet DUVTECH.",
   "lang": "fr",
   "id": "./",
   "start_url": "./index.html",

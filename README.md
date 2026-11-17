@@ -1,5 +1,7 @@
 # LabVirtyèl Ayiti — prototype
 
+Un projet **DUVTECH**.
+
 Un laboratoire virtuel bilingue (français et kreyòl) qui fonctionne **sans Internet et sans serveur**.
 
 ## Lancer le prototype
