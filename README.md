@@ -36,9 +36,12 @@ LabVirtyel-Ayiti/
     └── solaire.html    Physique : panneau solaire et bilan d'énergie d'une maison
 ```
 
+## Matériel de physique (3B Scientific)
+`js/data-materiel.js` ajoute 1292 fiches « Matériel » au domaine Physique de la bibliothèque (nom, référence, code fabricant, description courte, lien vers la fiche du fournisseur). Les données ont été relevées le 19/11/2026 sur le catalogue en ligne de 3B Scientific ; les descriptions sont en français seulement et les photos restent sur le site du fournisseur. Le fichier n'est chargé que par `bibliotheque.html` et `ressource.html`.
+
 ## Apparence et profil utilisateur
 - `profil.html` (lien « Mon profil » en haut de chaque page) : nom, établissement, rôle, progression personnelle, export de ses données, et réglages d'affichage.
-- 4 palettes, chacune en clair et en sombre : **Classique** (par défaut : papier, bleu marine, bordeaux), **Haïti** (bleu et rouge du drapeau), **Sobre** (gris anthracite), **Contraste élevé** (accessibilité). 3 tailles de texte.
+- 4 palettes, chacune en clair et en sombre : **Classique** (par défaut : blanc, bleu, brique), **Haïti** (bleu et rouge du drapeau), **Sobre** (gris anthracite), **Contraste élevé** (accessibilité). 3 tailles de texte.
 - Les couleurs sont définies une seule fois, en haut de `css/style.css` (variables `--accent`, `--red`, `--d-physique`…). Pour créer une nouvelle palette, copiez un bloc `[data-palette="…"]` et ajoutez-la dans la liste `PALETTES` de `profil.html`.
 - `js/theme.js` applique les réglages avant l'affichage. Une adresse peut aussi les forcer : `index.html?palette=haiti&mode=sombre`.
 

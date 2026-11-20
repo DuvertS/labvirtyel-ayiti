@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="css/style.css">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="author" content="DUVTECH">
-<meta name="theme-color" content="#1f3a5f">
+<meta name="theme-color" content="#1f3f7a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="LabVirtyèl">
@@ -70,7 +70,7 @@
     var steps = p.steps.map(function (id, i) {
       var r = APP.resource(id);
       return '<button class="step' + (APP.isDone(id) ? ' done' : '') + (i === current && !finished ? ' current' : '') + '" data-i="' + i + '">' +
-        '<span class="n">' + (APP.isDone(id) ? '✓' : i + 1) + '</span>' +
+        '<span class="n">' + (i + 1) + '</span>' +
         '<span><b>' + esc(L(r.title)) + '</b><small>' + esc(L(D.types[r.type])) + ' · ' + r.minutes + ' min</small></span></button>';
     }).join('');
 
@@ -96,7 +96,7 @@
   function renderStage() {
     var stage = document.getElementById('stage');
     if (finished) {
-      stage.innerHTML = '<div class="finish"><div class="big">✓</div><h2>' + LV.t('Parcours terminé !', 'Ou fini pakou a !') + '</h2>' +
+      stage.innerHTML = '<div class="finish"><h2>' + LV.t('Parcours terminé !', 'Ou fini pakou a !') + '</h2>' +
         '<p>' + LV.t('Bravo. Vous pouvez revoir une étape ou choisir un autre parcours.', 'Bravo. Ou ka revize yon etap oswa chwazi yon lòt pakou.') + '</p>' +
         '<a class="btn primary" href="bibliotheque.html?tab=parcours" style="text-decoration:none;display:inline-block">' + LV.t('Autres parcours', 'Lòt pakou') + '</a></div>';
       return;
@@ -108,9 +108,9 @@
       '<p class="subtitle" style="margin:0 0 14px">' + esc(L(r.summary)) + '</p>' +
       '<div id="stepbody"></div>' +
       '<div class="step-nav">' +
-        '<button class="btn" id="prev"' + (current === 0 ? ' disabled' : '') + '>← ' + LV.t('Précédent', 'Anvan') + '</button>' +
+        '<button class="btn" id="prev"' + (current === 0 ? ' disabled' : '') + '>' + LV.t('Précédent', 'Anvan') + '</button>' +
         '<button class="btn primary" id="next">' +
-          (r.type === 'quiz' && !APP.isDone(r.id) ? LV.t('Passer', 'Sote') : (last ? LV.t('Terminer le parcours', 'Fini pakou a') : LV.t('Terminé, étape suivante', 'Fini, etap apre a'))) + ' →</button>' +
+          (r.type === 'quiz' && !APP.isDone(r.id) ? LV.t('Passer', 'Sote') : (last ? LV.t('Terminer le parcours', 'Fini pakou a') : LV.t('Terminé, étape suivante', 'Fini, etap apre a'))) + '</button>' +
       '</div>';
     APP.renderBody(r, document.getElementById('stepbody'), function () { refreshHeader(); });
     document.getElementById('prev').addEventListener('click', function () { go(current - 1); });
@@ -126,9 +126,9 @@
     page.querySelector('.progress i').style.width = pr.pct + '%';
     page.querySelector('.progress-label').textContent = pr.n + ' / ' + pr.total + ' ' + LV.t('étapes terminées', 'etap fini') + ' · ' + pr.pct + ' %';
     var b = page.querySelector('.step[data-i="' + current + '"]');
-    b.classList.add('done'); b.querySelector('.n').textContent = '✓';
+    b.classList.add('done');
     var next = document.getElementById('next');
-    next.textContent = (current === p.steps.length - 1 ? LV.t('Terminer le parcours', 'Fini pakou a') : LV.t('Étape suivante', 'Etap apre a')) + ' →';
+    next.textContent = (current === p.steps.length - 1 ? LV.t('Terminer le parcours', 'Fini pakou a') : LV.t('Étape suivante', 'Etap apre a')) + '';
   }
 
   function go(i) { current = Math.max(0, Math.min(p.steps.length - 1, i)); render(); window.scrollTo(0, 0); }

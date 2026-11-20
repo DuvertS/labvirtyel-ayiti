@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="css/style.css">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="author" content="DUVTECH">
-<meta name="theme-color" content="#1f3a5f">
+<meta name="theme-color" content="#1f3f7a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="LabVirtyèl">
@@ -144,7 +144,7 @@
         }).join('') +
         '<td><b>' + r.overall + ' %</b>' + (r.qavg !== null ? '<div class="qs">' + LV.t('Quiz : ', 'Quiz : ') + pct(r.qavg) + '</div>' : '') + '</td>' +
         '<td class="qs">' + fmtDate(r.st.updated) + '</td>' +
-        '<td><button class="icon-btn" data-del="' + r.sid + '" title="' + LV.t('Retirer', 'Retire') + '">✕</button></td></tr>';
+        '<td><button class="icon-btn" data-del="' + r.sid + '" title="' + LV.t('Retirer', 'Retire') + '">' + LV.t('Retirer', 'Retire') + '</button></td></tr>';
     }).join('');
 
     main.innerHTML =
@@ -201,7 +201,7 @@
       btn.dataset.confirm = '1';
       btn.textContent = LV.t('Cliquez encore pour confirmer', 'Klike ankò pou konfime');
     });
-    document.getElementById('copyinv').addEventListener('click', function () { CLASSE.copy(invite, this, LV.t('✓ Copié', '✓ Kopye')); });
+    document.getElementById('copyinv').addEventListener('click', function () { CLASSE.copy(invite, this, LV.t('Copié', 'Kopye')); });
     document.getElementById('dlinv').addEventListener('click', function () { CLASSE.download('invitation-' + c.id + '.txt', invite); });
     document.getElementById('imp').addEventListener('click', function () { importText(c, document.getElementById('codes').value); });
     document.getElementById('files').addEventListener('change', function (e) {
@@ -241,7 +241,7 @@
       var r = CLASSE.importResult(c.id, code);
       if (r.ok) ok.push(r.name); else if (r.msg === 'otherclass') other.push(r.name); else bad++;
     });
-    flash = (ok.length ? '<div class="ok">✓ ' + ok.length + ' ' + LV.t('résultat(s) importé(s) : ', 'rezilta enpòte : ') + ok.map(esc).join(', ') + '</div>' : '') +
+    flash = (ok.length ? '<div class="ok">' + ok.length + ' ' + LV.t('résultat(s) importé(s) : ', 'rezilta enpòte : ') + ok.map(esc).join(', ') + '</div>' : '') +
       (other.length ? '<div class="err">' + LV.t('Code d\'une autre classe : ', 'Kòd yon lòt klas : ') + other.map(esc).join(', ') + '</div>' : '') +
       (bad || !codes.length ? '<div class="err">' + LV.t('Code(s) non reconnu(s). Vérifiez qu\'il commence par LVR1.', 'Nou pa rekonèt kòd la. Verifye li kòmanse ak LVR1.') + '</div>' : '');
     render();

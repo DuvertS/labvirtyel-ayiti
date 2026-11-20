@@ -14,7 +14,8 @@ var LV_DATA = {
   types: {
     simulation: { fr: 'Simulation', ht: 'Simulasyon' },
     article:    { fr: 'Article',    ht: 'Atik' },
-    quiz:       { fr: 'Quiz',       ht: 'Quiz' }
+    quiz:       { fr: 'Quiz',       ht: 'Quiz' },
+    materiel:   { fr: 'Matériel',   ht: 'Materyèl' }   /* fiches produits : voir js/data-materiel.js */
   },
   levels: {
     initiation:    { fr: 'Initiation',    ht: 'Inisyasyon' },

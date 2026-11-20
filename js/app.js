@@ -32,6 +32,7 @@ var APP = (function () {
     simulation: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4.5 18.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3"/><path d="M7 15h10"/></svg>',
     article: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>',
     quiz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5h.01"/></svg>',
+    materiel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>',
     pathway: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 6h8a3 3 0 0 1 0 6H9a3 3 0 0 0 0 6h8"/></svg>'
   };
 
@@ -41,10 +42,12 @@ var APP = (function () {
   function resourceCard(r) {
     return '<a class="rcard" ' + dc(r.domain) + ' href="ressource.html?id=' + r.id + '">' +
       '<div class="thumb">' + ICON[r.type] + '<span class="type">' + esc(L(D.types[r.type])) + '</span>' +
-      (isDone(r.id) ? '<span class="done">✓ ' + LV.t('Terminé', 'Fini') + '</span>' : '') + '</div>' +
+      (isDone(r.id) ? '<span class="done">' + LV.t('Terminé', 'Fini') + '</span>' : '') + '</div>' +
       '<div class="body"><div class="dom">' + esc(L(D.domains[r.domain])) + '</div>' +
       '<h3>' + esc(L(r.title)) + '</h3><p>' + esc(L(r.summary)) + '</p>' +
-      '<div class="meta"><span>' + r.minutes + ' min</span><span>' + esc(L(D.levels[r.level])) + '</span></div></div></a>';
+      '<div class="meta">' + (r.type === 'materiel'
+        ? '<span>' + LV.t('Réf. ', 'Ref. ') + esc(r.ref) + '</span>' + (r.code ? '<span>' + esc(r.code) + '</span>' : '')
+        : '<span>' + r.minutes + ' min</span><span>' + esc(L(D.levels[r.level])) + '</span>') + '</div></div></a>';
   }
 
   function pathwayCard(p) {
@@ -52,7 +55,7 @@ var APP = (function () {
     var bars = p.steps.map(function (id) { return '<i class="' + (isDone(id) ? 'ok' : '') + '"></i>'; }).join('');
     return '<a class="rcard pathway" ' + dc(p.domain) + ' href="parcours.html?id=' + p.id + '">' +
       '<div class="thumb">' + ICON.pathway + '<span class="type">' + LV.t('Parcours', 'Pakou') + ' · ' + p.steps.length + ' ' + LV.t('étapes', 'etap') + '</span>' +
-      (pr.n === pr.total ? '<span class="done">✓ ' + LV.t('Terminé', 'Fini') + '</span>' : '') + '</div>' +
+      (pr.n === pr.total ? '<span class="done">' + LV.t('Terminé', 'Fini') + '</span>' : '') + '</div>' +
       '<div class="body"><div class="dom">' + esc(L(D.domains[p.domain])) + '</div>' +
       '<h3>' + esc(L(p.title)) + '</h3><p>' + esc(L(p.summary)) + '</p>' +
       '<div class="meta"><span>' + pathMinutes(p) + ' min</span><span>' + esc(L(D.levels[p.level])) + '</span>' +
@@ -68,7 +71,7 @@ var APP = (function () {
     return '<a class="sim-tile" ' + dc(r.domain) + ' href="ressource.html?id=' + r.id + '">' +
       '<div class="sim-img"><img src="' + thumb(r) + '" alt="" loading="lazy"><span class="play">' + PLAY + '</span>' +
       (NEW.indexOf(r.id) >= 0 ? '<span class="badge new">' + LV.t('Nouveau', 'Nouvo') + '</span>' : '') +
-      (isDone(r.id) ? '<span class="badge ok">✓ ' + LV.t('Terminé', 'Fini') + '</span>' : '') + '</div>' +
+      (isDone(r.id) ? '<span class="badge ok">' + LV.t('Terminé', 'Fini') + '</span>' : '') + '</div>' +
       '<div class="sim-txt"><div class="sim-name">' + esc(L(r.title)) + '</div>' +
       '<div class="sim-dom">' + esc(L(D.domains[r.domain])) + '</div>' +
       '<p class="sim-sum">' + esc(L(r.summary)) + '</p></div></a>';
@@ -91,11 +94,19 @@ var APP = (function () {
   function renderBody(r, el, onDone) {
     if (r.type === 'simulation') {
       el.innerHTML = '<iframe class="sim" title="' + esc(L(r.title)) + '" src="' + r.src + '?embed=1&lang=' + LV.lang() + '&' + LV.themeQuery() + '"></iframe>' +
-        '<p style="font-size:.88rem;margin-top:8px"><a href="' + r.src + '" target="_blank">' + LV.t('Ouvrir la simulation en plein écran ↗', 'Louvri simulasyon an sou tout ekran an ↗') + '</a></p>';
+        '<p style="font-size:.88rem;margin-top:8px"><a href="' + r.src + '" target="_blank">' + LV.t('Ouvrir la simulation en plein écran', 'Louvri simulasyon an sou tout ekran an') + '</a></p>';
     } else if (r.type === 'article') {
       el.innerHTML = '<div class="article">' + L(r.body) + '</div>';   /* contenu interne de confiance (data.js) */
     } else if (r.type === 'quiz') {
       renderQuiz(r, el, onDone);
+    } else if (r.type === 'materiel') {
+      el.innerHTML = '<div class="article"><table class="fiche">' +
+        '<tr><th>' + LV.t('Référence', 'Referans') + '</th><td>' + esc(r.ref) + '</td></tr>' +
+        (r.code ? '<tr><th>' + LV.t('Code fabricant', 'Kòd faktori') + '</th><td>' + esc(r.code) + '</td></tr>' : '') +
+        '<tr><th>' + LV.t('Fournisseur', 'Founisè') + '</th><td>3B Scientific</td></tr></table>' +
+        '<p class="note">' + LV.t('Description reprise du catalogue 3B Scientific, en français seulement. La fiche complète, les photos et les conditions de vente sont sur le site du fournisseur (connexion Internet nécessaire).',
+          'Deskripsyon an soti nan katalòg 3B Scientific, an franse sèlman. Fich konplè a, foto yo ak kondisyon pou achte yo sou sit founisè a (fòk gen entènèt).') + '</p>' +
+        '<p><a class="btn primary" href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer">' + LV.t('Voir la fiche sur 3B Scientific', 'Gade fich la sou 3B Scientific') + '</a></p></div>';
     }
   }
 

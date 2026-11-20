@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="css/style.css">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="author" content="DUVTECH">
-<meta name="theme-color" content="#1f3a5f">
+<meta name="theme-color" content="#1f3f7a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="LabVirtyèl">
@@ -88,7 +88,7 @@
     var el = document.getElementById('status');
     var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
     if (standalone) {
-      el.textContent = LV.t('✓ L\'application est installée et fonctionne hors ligne.', '✓ Aplikasyon an enstale e li mache san entènèt.');
+      el.textContent = LV.t('L\'application est installée et fonctionne hors ligne.', 'Aplikasyon an enstale e li mache san entènèt.');
     } else if (!/^https?:$/.test(location.protocol)) {
       el.textContent = LV.t('Vous avez ouvert le fichier directement depuis l\'ordinateur. Pour installer l\'application, le site doit être publié en ligne (adresse https://).',
                             'Ou louvri fichye a dirèkteman sou òdinatè a. Pou enstale aplikasyon an, fòk sit la pibliye sou entènèt (adrès https://).');

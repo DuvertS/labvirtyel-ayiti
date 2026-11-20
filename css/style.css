@@ -2,16 +2,16 @@
    Palettes : data-palette="classique | haiti | sobre | contraste" sur <html> (voir js/theme.js)
    Mode     : data-mode="clair | sombre"      Taille : data-taille="petit | normal | grand" */
 
-/* ---------- Palette CLASSIQUE (par défaut) : papier, bleu marine, bordeaux ---------- */
+/* ---------- Palette CLASSIQUE (par défaut) : blanc, bleu, brique ---------- */
 :root {
-  --bg: #f5f2ea;  --surface: #fffdf8;  --text: #23211d;  --muted: #67615a;  --border: #ddd5c6;
-  --accent: #1f3a5f;  --on-accent: #ffffff;  --accent-soft: #e8ebf0;
-  --red: #8b1e2d;  --good: #3d6b3a;  --warn: #9a5b17;  --plot-grid: #ebe5d9;
-  --d-physique: #1f3a5f; --d-chimie: #5e3a6e; --d-svt: #3d6b3a; --d-electronique: #9a5b17; --d-informatique: #2d5d68; --d-sante: #8b1e2d;
+  --bg: #f6f6f4;  --surface: #ffffff;  --text: #1c1c1c;  --muted: #5c5c5c;  --border: #d4d4d0;
+  --accent: #1f3f7a;  --on-accent: #ffffff;  --accent-soft: #e6ebf4;
+  --red: #a63a24;  --good: #2f6b2f;  --warn: #8a5a00;  --plot-grid: #e6e6e2;
+  --d-physique: #1d4f91; --d-chimie: #9c3f12; --d-svt: #2f6b2f; --d-electronique: #7a5c00; --d-informatique: #00616e; --d-sante: #a3172f;
   --s-color: var(--d-physique); --i-color: var(--d-sante); --r-color: var(--d-svt);
-  --radius: 6px;
+  --radius: 0;
   --font: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
-  --font-title: Georgia, Cambria, "Times New Roman", serif;
+  --font-title: var(--font);
   color-scheme: light;
 }
 /* ---------- Palette HAÏTI : bleu et rouge du drapeau ---------- */
@@ -37,8 +37,8 @@
 [data-mode="sombre"] {
   --bg: #16181b;  --surface: #1e2125;  --text: #ebe7df;  --muted: #a39d93;  --border: #363a40;
   --on-accent: #111111;  --accent-soft: #263040;  --plot-grid: #2b2f34;
-  --accent: #8fb0d9;  --red: #d98b95;  --good: #8cbf87;  --warn: #e0a85a;
-  --d-physique: #8fb0d9; --d-chimie: #c3a0d1; --d-svt: #8cbf87; --d-electronique: #e0a85a; --d-informatique: #84bcc7; --d-sante: #d98b95;
+  --accent: #8fb0e6;  --red: #e8907c;  --good: #8cc58c;  --warn: #e0bf5c;
+  --d-physique: #8db4e8; --d-chimie: #e39a72; --d-svt: #8cc58c; --d-electronique: #e0bf5c; --d-informatique: #6fc3cf; --d-sante: #f08a9a;
   color-scheme: dark;
 }
 [data-mode="sombre"][data-palette="haiti"] {
@@ -62,6 +62,12 @@ html[data-taille="grand"] { font-size: 18.5px; }
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.55; }
+/* Arrière-plan : motif scientifique (img/fond-lab.jpg), voilé par la couleur de fond pour garder le texte lisible */
+body { --fond-voile: 82%;
+  background-image: linear-gradient(color-mix(in srgb, var(--bg) var(--fond-voile), transparent), color-mix(in srgb, var(--bg) var(--fond-voile), transparent)), url("../img/fond-lab.jpg");
+  background-size: auto, 600px 600px; background-repeat: repeat; background-attachment: fixed; }
+[data-mode="sombre"] body { --fond-voile: 93%; }
+[data-palette="contraste"] body { background-image: none; }   /* accessibilité : fond uni */
 a { color: var(--accent); }
 h1, h2, h3, .brand { font-family: var(--font-title); font-weight: 700; letter-spacing: 0; }
 [data-palette="contraste"] a { text-decoration: underline; }
@@ -96,7 +102,7 @@ h1 { font-size: 1.6rem; margin: 0 0 4px; }
   padding: 18px; text-decoration: none; color: var(--text); display: block; transition: border-color .15s;
 }
 .card:hover { border-color: var(--accent); }
-.card .domain { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); font-weight: 700; }
+.card .domain { font-size: .8rem; color: var(--accent); font-weight: 700; }
 .card h3 { margin: 6px 0 6px; font-size: 1.1rem; }
 .card p { margin: 0; color: var(--muted); font-size: .92rem; }
 
@@ -129,17 +135,17 @@ canvas, svg.view { width: 100%; height: auto; display: block; background: var(--
 .theory { margin-top: 16px; }
 .theory h2 { font-size: 1rem; }
 .theory p, .theory li { font-size: .92rem; }
-.formula { font-family: "Cambria Math", Georgia, serif; font-size: 1.05rem; background: var(--bg); padding: 6px 10px; border-radius: 6px; display: inline-block; }
+.formula { font-family: "Cambria Math", Georgia, serif; font-size: 1.05rem; background: var(--bg); padding: 6px 10px; border-radius: 0; display: inline-block; }
 table.tt { border-collapse: collapse; width: 100%; font-size: .9rem; }
 table.tt th, table.tt td { border: 1px solid var(--border); padding: 6px; text-align: center; }
 table.tt tr.on td { background: var(--accent-soft); font-weight: 700; }
 /* Mode intégré (simulation dans une page ressource ou un parcours) */
 .embed header.site, .embed .back, .embed main > h1, .embed main > .subtitle, .embed footer.site { display: none; }
 .embed main { padding: 0; max-width: none; }
-.embed body { background: transparent; }
+.embed body { background: transparent; background-image: none; }
 
 footer.site { text-align: center; color: var(--muted); font-size: .8rem; padding: 24px 16px; }
-footer.site .org { display: block; margin-top: 4px; font-weight: 600; letter-spacing: .04em; }
+footer.site .org { display: block; margin-top: 4px; font-weight: 600; }
 
 /* Application installable */
 .install-btn { font: inherit; font-size: .85rem; font-weight: 700; padding: 5px 12px; border-radius: var(--radius); cursor: pointer;

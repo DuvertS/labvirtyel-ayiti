@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="css/style.css">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="author" content="DUVTECH">
-<meta name="theme-color" content="#1f3a5f">
+<meta name="theme-color" content="#1f3f7a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="LabVirtyèl">
@@ -42,6 +42,7 @@
 <script src="js/common.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/data.js"></script>
+<script src="js/data-materiel.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function () {
@@ -59,7 +60,9 @@
     if (r.type === 'simulation') return renderSim();
     var color = D.domains[r.domain].color;
     var paths = APP.pathwaysOf(r.id);
-    var related = D.resources.filter(function (x) { return x.domain === r.domain && x.id !== r.id; });
+    var isMat = r.type === 'materiel';
+    /* Ressources liées : les articles, simulations et quiz du domaine (pas les 1292 fiches de matériel). */
+    var related = D.resources.filter(function (x) { return x.domain === r.domain && x.id !== r.id && x.type !== 'materiel'; }).slice(0, 8);
 
     page.innerHTML =
       '<div class="crumbs"><a href="bibliotheque.html">' + LV.t('Bibliothèque', 'Bibliyotèk') + '</a> › ' +
@@ -68,18 +71,19 @@
         '<div class="dom">' + esc(L(D.domains[r.domain])) + ' · ' + esc(L(D.types[r.type])) + '</div>' +
         '<h1>' + esc(L(r.title)) + '</h1>' +
         '<p class="subtitle" style="margin:0 0 8px">' + esc(L(r.summary)) + '</p>' +
-        '<div class="chips"><span class="chip">' + r.minutes + ' min</span><span class="chip">' + esc(L(D.levels[r.level])) + '</span>' +
+        '<div class="chips">' + (isMat ? '<span class="chip">' + LV.t('Réf. ', 'Ref. ') + esc(r.ref) + '</span>'
+            : '<span class="chip">' + r.minutes + ' min</span><span class="chip">' + esc(L(D.levels[r.level])) + '</span>') +
           r.audiences.map(function (a) { return '<span class="chip">' + esc(L(D.audiences[a])) + '</span>'; }).join('') +
-          '<span class="chip">FR · HT</span></div>' +
+          '<span class="chip">' + (isMat ? 'FR' : 'FR · HT') + '</span></div>' +
       '</div>' +
       '<div class="res">' +
         '<div class="res-main" id="body"></div>' +
         '<aside class="res-side">' +
-          '<div class="panel"><h2>' + LV.t('Objectifs', 'Objektif') + '</h2><ul>' +
-            r.objectives.map(function (o) { return '<li>' + esc(L(o)) + '</li>'; }).join('') + '</ul></div>' +
+          (r.objectives ? '<div class="panel"><h2>' + LV.t('Objectifs', 'Objektif') + '</h2><ul>' +
+            r.objectives.map(function (o) { return '<li>' + esc(L(o)) + '</li>'; }).join('') + '</ul></div>' : '') +
           '<div class="panel">' +
-            '<button class="btn primary" id="done"></button>' +
-            '<button class="btn" id="print">' + LV.t('Imprimer la fiche de TP', 'Enprime fich TP a') + '</button>' +
+            (isMat ? '' : '<button class="btn primary" id="done"></button>') +
+            '<button class="btn" id="print">' + (isMat ? LV.t('Imprimer la fiche', 'Enprime fich la') : LV.t('Imprimer la fiche de TP', 'Enprime fich TP a')) + '</button>' +
           '</div>' +
           (paths.length ? '<div class="panel related"><h2>' + LV.t('Dans le parcours', 'Nan pakou') + '</h2>' +
             paths.map(function (p) {
@@ -94,7 +98,7 @@
       '</div>';
 
     APP.renderBody(r, document.getElementById('body'), updateDone);
-    document.getElementById('done').addEventListener('click', function () { APP.markDone(r.id); updateDone(); });
+    if (!isMat) document.getElementById('done').addEventListener('click', function () { APP.markDone(r.id); updateDone(); });
     document.getElementById('print').addEventListener('click', function () { window.print(); });
     updateDone();
   }
@@ -145,7 +149,7 @@
             '<dt>' + LV.t('Sans Internet', 'San entènèt') + '</dt><dd>' + LV.t('Oui', 'Wi') + '</dd>' +
           '</dl>' +
           '<button class="btn primary" id="launch">' + LV.t('Lancer la simulation', 'Lanse simulasyon an') + '</button>' +
-          '<a class="btn" href="' + r.src + '?lang=' + LV.lang() + '" target="_blank">' + LV.t('Plein écran ↗', 'Tout ekran ↗') + '</a>' +
+          '<a class="btn" href="' + r.src + '?lang=' + LV.lang() + '" target="_blank">' + LV.t('Plein écran', 'Tout ekran') + '</a>' +
           '<button class="btn" id="done"></button>' +
         '</aside>' +
       '</div>' +
@@ -185,7 +189,7 @@
     var b = document.getElementById('done');
     if (!b) return;
     var done = APP.isDone(r.id);
-    b.textContent = done ? LV.t('✓ Terminé', '✓ Fini') : LV.t('Marquer comme terminé', 'Make li fini');
+    b.textContent = done ? LV.t('Terminé', 'Fini') : LV.t('Marquer comme terminé', 'Make li fini');
     b.disabled = done;
   }
 

@@ -52,7 +52,7 @@ var COMM = (function () {
       var host = '';
       try { host = new URL(r.url).hostname; } catch (e) { host = ''; }
       box.innerHTML = '<p>' + LV.t('Ce lien ouvre un site extérieur : ', 'Lyen sa a louvri yon sit deyò : ') + '<b>' + esc(host) + '</b></p>' +
-        '<a class="btn primary" href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer nofollow">' + LV.t('Ouvrir le site ↗', 'Louvri sit la ↗') + '</a>';
+        '<a class="btn primary" href="' + esc(r.url) + '" target="_blank" rel="noopener noreferrer nofollow">' + LV.t('Ouvrir le site', 'Louvri sit la') + '</a>';
       return;
     }
     if (r.kind === 'document' && r.file_path) {
@@ -60,7 +60,7 @@ var COMM = (function () {
       box.hidden = false;
       if (s.error) { box.innerHTML = '<p class="note">' + LV.t('Fichier indisponible (connexion Internet requise).', 'Fichye a pa disponib (fòk gen entènèt).') + '</p>'; return; }
       box.innerHTML = '<p>' + esc(r.file_name || '') + '</p>' + (r.body ? bodyHtml(r.body) : '') +
-        '<a class="btn primary" href="' + esc(s.data.signedUrl) + '" target="_blank" rel="noopener noreferrer">' + LV.t('Ouvrir le fichier ↗', 'Louvri fichye a ↗') + '</a>';
+        '<a class="btn primary" href="' + esc(s.data.signedUrl) + '" target="_blank" rel="noopener noreferrer">' + LV.t('Ouvrir le fichier', 'Louvri fichye a') + '</a>';
     }
   }
 
