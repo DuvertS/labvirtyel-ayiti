@@ -30,6 +30,16 @@ create table if not exists public.profiles (
 );
 alter table public.profiles enable row level security;
 
+-- Informations d'identité demandées à l'inscription (obligatoires dans le formulaire)
+alter table public.profiles add column if not exists last_name  text not null default '';
+alter table public.profiles add column if not exists first_name text not null default '';
+alter table public.profiles add column if not exists sex        text not null default '';
+alter table public.profiles add column if not exists birth_date date;
+alter table public.profiles add column if not exists address    text not null default '';
+alter table public.profiles add column if not exists phone      text not null default '';
+alter table public.profiles drop constraint if exists profiles_sex_check;
+alter table public.profiles add constraint profiles_sex_check check (sex in ('', 'F', 'M'));
+
 -- Fonctions d'autorisation (security definer : elles lisent les profils sans boucle de règles)
 create or replace function public.is_admin() returns boolean
 language sql stable security definer set search_path = public as $$
@@ -49,13 +59,29 @@ $$;
 -- Création automatique du profil à l'inscription
 create or replace function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
-declare t text := coalesce(new.raw_user_meta_data->>'profile_type', 'public');
+declare
+  m  jsonb := coalesce(new.raw_user_meta_data, '{}'::jsonb);
+  t  text  := coalesce(m->>'profile_type', 'public');
+  sx text  := coalesce(m->>'sex', '');
+  bd date;
 begin
   if t not in ('eleve','etudiant','enseignant','formateur','public') then t := 'public'; end if;
-  insert into profiles (id, email, full_name, school, profile_type, teacher_status, email_confirmed_at)
+  if sx not in ('F','M') then sx := ''; end if;
+  begin
+    bd := (m->>'birth_date')::date;
+    if bd < date '1900-01-01' or bd > current_date then bd := null; end if;
+  exception when others then bd := null;   -- date illisible : ignorée, l'inscription n'échoue pas
+  end;
+  insert into profiles (id, email, full_name, last_name, first_name, sex, birth_date, address, phone,
+                        school, profile_type, teacher_status, email_confirmed_at)
   values (new.id, new.email,
-          left(coalesce(new.raw_user_meta_data->>'full_name', ''), 120),
-          left(coalesce(new.raw_user_meta_data->>'school', ''), 160),
+          left(coalesce(m->>'full_name', ''), 120),
+          left(coalesce(m->>'last_name', ''), 60),
+          left(coalesce(m->>'first_name', ''), 60),
+          sx, bd,
+          left(coalesce(m->>'address', ''), 200),
+          left(coalesce(m->>'phone', ''), 20),
+          left(coalesce(m->>'school', ''), 160),
           t,
           case when t in ('enseignant','formateur') then 'en_attente' else 'aucun' end,
           new.email_confirmed_at)
@@ -79,7 +105,7 @@ drop trigger if exists on_auth_user_updated on auth.users;
 create trigger on_auth_user_updated after update of email_confirmed_at, email on auth.users
   for each row execute function public.handle_user_updated();
 
--- Un participant ne peut modifier que son nom, son établissement, son profil et sa dernière activité.
+-- Un participant ne peut modifier que ses informations personnelles, son établissement, son profil et sa dernière activité.
 -- Rôle, statut et validation enseignant : réservés aux administrateurs.
 create or replace function public.protect_profile() returns trigger
 language plpgsql set search_path = public as $$
@@ -98,6 +124,12 @@ begin
   end if;
   if new.profile_type not in ('eleve','etudiant','enseignant','formateur','public') then new.profile_type := old.profile_type; end if;
   new.full_name := left(new.full_name, 120);
+  new.last_name := left(new.last_name, 60);
+  new.first_name := left(new.first_name, 60);
+  new.address := left(new.address, 200);
+  new.phone := left(new.phone, 20);
+  if new.sex not in ('', 'F', 'M') then new.sex := old.sex; end if;
+  if new.birth_date < date '1900-01-01' or new.birth_date > current_date then new.birth_date := old.birth_date; end if;
   new.school := left(new.school, 160);
   return new;
 end $$;

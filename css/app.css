@@ -346,6 +346,8 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .fld textarea { resize: vertical; }
 .fld input:focus, .fld textarea:focus, .fld select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .fld small { display: block; margin-top: 6px; font-size: .82rem; }
+.fld-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+@media (max-width: 480px) { .fld-row { grid-template-columns: 1fr; } }
 .roles { display: flex; flex-wrap: wrap; gap: 6px 14px; }
 .roles label { display: flex; align-items: center; gap: 6px; font-size: .92rem; cursor: pointer; }
 .roles input, .check input { accent-color: var(--accent); }

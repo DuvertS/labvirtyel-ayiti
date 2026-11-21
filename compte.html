@@ -112,7 +112,14 @@
       var types = [['eleve', 'Élève (école classique)', 'Elèv (lekòl klasik)'], ['etudiant', 'Étudiant(e)', 'Etidyan'], ['enseignant', 'Enseignant(e)', 'Pwofesè'],
         ['formateur', 'Formateur / formatrice', 'Fòmatè'], ['public', 'Grand public', 'Piblik']];
       html = tabs + note + '<form data-form="inscription">' +
-        field('fn', LV.t('Nom complet', 'Non konplè'), 'text', 'required maxlength="120" autocomplete="name"') +
+        '<div class="fld-row">' + field('ln', LV.t('Nom', 'Non'), 'text', 'required maxlength="60" autocomplete="family-name"') +
+          field('fn', LV.t('Prénom', 'Prenon'), 'text', 'required maxlength="60" autocomplete="given-name"') + '</div>' +
+        '<div class="fld-row"><label class="fld" for="sx"><span>' + LV.t('Sexe', 'Sèks') + '</span><select id="sx" required>' +
+          '<option value="">' + LV.t('Choisir…', 'Chwazi…') + '</option>' +
+          '<option value="F">' + LV.t('Féminin', 'Fi') + '</option><option value="M">' + LV.t('Masculin', 'Gason') + '</option></select></label>' +
+          field('bd', LV.t('Date de naissance', 'Dat nesans'), 'date', 'required autocomplete="bday" min="1900-01-01" max="' + new Date().toISOString().slice(0, 10) + '"') + '</div>' +
+        field('ad', LV.t('Adresse', 'Adrès'), 'text', 'required maxlength="200" autocomplete="street-address" placeholder="' + LV.t('Rue, quartier, ville', 'Ri, katye, vil') + '"') +
+        field('ph', LV.t('Téléphone', 'Telefòn'), 'tel', 'required maxlength="20" autocomplete="tel" placeholder="+509 3X XX XXXX"') +
         field('sc', LV.t('Établissement (facultatif)', 'Lekòl oswa enstitisyon (si genyen)'), 'text', 'maxlength="160" autocomplete="organization"') +
         '<fieldset class="fld"><legend>' + LV.t('Je suis', 'Mwen se') + '</legend><div class="roles">' + types.map(function (t, i) {
           return '<label><input type="radio" name="pt" value="' + t[0] + '"' + (i === 0 ? ' checked' : '') + '> ' + LV.t(t[1], t[2]) + '</label>';
@@ -175,12 +182,19 @@
         return;
       }
       if (kind === 'inscription') {
-        if (val('fn').length < 2) { msg('danger', LV.t('Indiquez votre nom complet.', 'Mete non konplè ou.')); return render(); }
+        if (val('ln').length < 2 || val('fn').length < 2) { msg('danger', LV.t('Indiquez votre nom et votre prénom.', 'Mete non ak prenon ou.')); return render(); }
+        if (['F', 'M'].indexOf(val('sx')) < 0) { msg('danger', LV.t('Indiquez votre sexe.', 'Chwazi sèks ou.')); return render(); }
+        var bd = val('bd'), age = bd ? (Date.now() - new Date(bd + 'T00:00:00').getTime()) / 31557600000 : -1;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(bd) || !(age >= 5 && age <= 120)) { msg('danger', LV.t('Indiquez une date de naissance valide.', 'Mete yon dat nesans ki bon.')); return render(); }
+        if (val('ad').length < 5) { msg('danger', LV.t('Indiquez votre adresse.', 'Mete adrès ou.')); return render(); }
+        if (!/^\+?[0-9 ().-]{8,20}$/.test(val('ph')) || val('ph').replace(/\D/g, '').length < 8) { msg('danger', LV.t('Indiquez un numéro de téléphone valide (8 chiffres au moins).', 'Mete yon nimewo telefòn ki bon (omwen 8 chif).')); return render(); }
         if (document.getElementById('pw1').value !== document.getElementById('pw2').value) { msg('danger', LV.t('Les deux mots de passe ne sont pas identiques.', 'De modpas yo pa menm.')); return render(); }
         lastEmail = val('em');
         var pt = form.querySelector('input[name=pt]:checked').value;
         var s = await sb.auth.signUp({ email: lastEmail, password: document.getElementById('pw1').value, options: {
-          emailRedirectTo: redirectUrl(), data: { full_name: val('fn'), school: val('sc'), profile_type: pt } } });
+          emailRedirectTo: redirectUrl(), data: {
+            full_name: val('fn') + ' ' + val('ln'), first_name: val('fn'), last_name: val('ln'), sex: val('sx'),
+            birth_date: bd, address: val('ad'), phone: val('ph'), school: val('sc'), profile_type: pt } } });
         if (s.error) { msg('danger', err(s.error)); return render(); }
         if (s.data.user && s.data.user.identities && s.data.user.identities.length === 0) {
           msg('danger', LV.t('Un compte existe déjà avec cette adresse. Connectez-vous, ou utilisez « Mot de passe oublié ».', 'Gen yon kont deja ak adrès sa a. Konekte, oswa itilize « Modpas bliye ».'));
