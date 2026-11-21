@@ -66,6 +66,8 @@
   function field(id, label, type, extra) {
     return '<label class="fld" for="' + id + '"><span>' + label + '</span><input id="' + id + '" type="' + type + '" ' + (extra || '') + '></label>';
   }
+  /* Lettres (accents compris) ; espace, trait d'union et apostrophe permis entre deux lettres : Jean-Pierre, D'Haïti */
+  var NOM_OK = /^\p{L}+(?:[ '’-]\p{L}+)*$/u, PAS_LETTRE = /[^\p{L} '’-]/gu;
   function msg(kind, text) { notice = { kind: kind, text: text }; }
   function err(e) {
     var m = (e && e.message) || '';
@@ -112,14 +114,14 @@
       var types = [['eleve', 'Élève (école classique)', 'Elèv (lekòl klasik)'], ['etudiant', 'Étudiant(e)', 'Etidyan'], ['enseignant', 'Enseignant(e)', 'Pwofesè'],
         ['formateur', 'Formateur / formatrice', 'Fòmatè'], ['public', 'Grand public', 'Piblik']];
       html = tabs + note + '<form data-form="inscription">' +
-        '<div class="fld-row">' + field('ln', LV.t('Nom', 'Non'), 'text', 'required maxlength="60" autocomplete="family-name"') +
-          field('fn', LV.t('Prénom', 'Prenon'), 'text', 'required maxlength="60" autocomplete="given-name"') + '</div>' +
+        '<div class="fld-row">' + field('ln', LV.t('Nom', 'Non'), 'text', 'required maxlength="60" autocomplete="family-name" data-filtre="lettres"') +
+          field('fn', LV.t('Prénom', 'Prenon'), 'text', 'required maxlength="60" autocomplete="given-name" data-filtre="lettres"') + '</div>' +
         '<div class="fld-row"><label class="fld" for="sx"><span>' + LV.t('Sexe', 'Sèks') + '</span><select id="sx" required>' +
           '<option value="">' + LV.t('Choisir…', 'Chwazi…') + '</option>' +
           '<option value="F">' + LV.t('Féminin', 'Fi') + '</option><option value="M">' + LV.t('Masculin', 'Gason') + '</option></select></label>' +
           field('bd', LV.t('Date de naissance', 'Dat nesans'), 'date', 'required autocomplete="bday" min="1900-01-01" max="' + new Date().toISOString().slice(0, 10) + '"') + '</div>' +
         field('ad', LV.t('Adresse', 'Adrès'), 'text', 'required maxlength="200" autocomplete="street-address" placeholder="' + LV.t('Rue, quartier, ville', 'Ri, katye, vil') + '"') +
-        field('ph', LV.t('Téléphone', 'Telefòn'), 'tel', 'required maxlength="20" autocomplete="tel" placeholder="+509 3X XX XXXX"') +
+        field('ph', LV.t('Téléphone (chiffres seulement)', 'Telefòn (chif sèlman)'), 'tel', 'required minlength="8" maxlength="15" inputmode="numeric" pattern="[0-9]{8,15}" autocomplete="tel" placeholder="50934123456" data-filtre="chiffres"') +
         field('sc', LV.t('Établissement (facultatif)', 'Lekòl oswa enstitisyon (si genyen)'), 'text', 'maxlength="160" autocomplete="organization"') +
         '<fieldset class="fld"><legend>' + LV.t('Je suis', 'Mwen se') + '</legend><div class="roles">' + types.map(function (t, i) {
           return '<label><input type="radio" name="pt" value="' + t[0] + '"' + (i === 0 ? ' checked' : '') + '> ' + LV.t(t[1], t[2]) + '</label>';
@@ -163,6 +165,13 @@
         render();
       });
     });
+    /* Saisie filtrée : lettres seulement pour nom et prénom, chiffres seulement pour le téléphone */
+    card.querySelectorAll('[data-filtre]').forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        var v = inp.value, f = inp.getAttribute('data-filtre') === 'chiffres' ? v.replace(/[^0-9]/g, '') : v.replace(PAS_LETTRE, '');
+        if (f !== v) { var pos = inp.selectionStart - (v.length - f.length); inp.value = f; try { inp.setSelectionRange(pos, pos); } catch (e) {} }
+      });
+    });
     var form = card.querySelector('form');
     if (form) form.addEventListener('submit', function (e) { e.preventDefault(); submit(form.getAttribute('data-form'), form); });
   }
@@ -183,11 +192,12 @@
       }
       if (kind === 'inscription') {
         if (val('ln').length < 2 || val('fn').length < 2) { msg('danger', LV.t('Indiquez votre nom et votre prénom.', 'Mete non ak prenon ou.')); return render(); }
+        if (!NOM_OK.test(val('ln')) || !NOM_OK.test(val('fn'))) { msg('danger', LV.t('Le nom et le prénom ne doivent contenir que des lettres.', 'Non ak prenon an dwe gen lèt sèlman.')); return render(); }
         if (['F', 'M'].indexOf(val('sx')) < 0) { msg('danger', LV.t('Indiquez votre sexe.', 'Chwazi sèks ou.')); return render(); }
         var bd = val('bd'), age = bd ? (Date.now() - new Date(bd + 'T00:00:00').getTime()) / 31557600000 : -1;
         if (!/^\d{4}-\d{2}-\d{2}$/.test(bd) || !(age >= 5 && age <= 120)) { msg('danger', LV.t('Indiquez une date de naissance valide.', 'Mete yon dat nesans ki bon.')); return render(); }
         if (val('ad').length < 5) { msg('danger', LV.t('Indiquez votre adresse.', 'Mete adrès ou.')); return render(); }
-        if (!/^\+?[0-9 ().-]{8,20}$/.test(val('ph')) || val('ph').replace(/\D/g, '').length < 8) { msg('danger', LV.t('Indiquez un numéro de téléphone valide (8 chiffres au moins).', 'Mete yon nimewo telefòn ki bon (omwen 8 chif).')); return render(); }
+        if (!/^[0-9]{8,15}$/.test(val('ph'))) { msg('danger', LV.t('Le téléphone ne doit contenir que des chiffres (8 à 15).', 'Telefòn nan dwe gen chif sèlman (8 a 15).')); return render(); }
         if (document.getElementById('pw1').value !== document.getElementById('pw2').value) { msg('danger', LV.t('Les deux mots de passe ne sont pas identiques.', 'De modpas yo pa menm.')); return render(); }
         lastEmail = val('em');
         var pt = form.querySelector('input[name=pt]:checked').value;

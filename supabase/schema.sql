@@ -76,11 +76,11 @@ begin
                         school, profile_type, teacher_status, email_confirmed_at)
   values (new.id, new.email,
           left(coalesce(m->>'full_name', ''), 120),
-          left(coalesce(m->>'last_name', ''), 60),
-          left(coalesce(m->>'first_name', ''), 60),
+          left(regexp_replace(coalesce(m->>'last_name', ''), '[^[:alpha:] ''’-]', '', 'g'), 60),   -- lettres seulement
+          left(regexp_replace(coalesce(m->>'first_name', ''), '[^[:alpha:] ''’-]', '', 'g'), 60),
           sx, bd,
           left(coalesce(m->>'address', ''), 200),
-          left(coalesce(m->>'phone', ''), 20),
+          left(regexp_replace(coalesce(m->>'phone', ''), '[^0-9]', '', 'g'), 15),                   -- chiffres seulement
           left(coalesce(m->>'school', ''), 160),
           t,
           case when t in ('enseignant','formateur') then 'en_attente' else 'aucun' end,
@@ -124,10 +124,10 @@ begin
   end if;
   if new.profile_type not in ('eleve','etudiant','enseignant','formateur','public') then new.profile_type := old.profile_type; end if;
   new.full_name := left(new.full_name, 120);
-  new.last_name := left(new.last_name, 60);
-  new.first_name := left(new.first_name, 60);
+  new.last_name := left(regexp_replace(new.last_name, '[^[:alpha:] ''’-]', '', 'g'), 60);
+  new.first_name := left(regexp_replace(new.first_name, '[^[:alpha:] ''’-]', '', 'g'), 60);
   new.address := left(new.address, 200);
-  new.phone := left(new.phone, 20);
+  new.phone := left(regexp_replace(new.phone, '[^0-9]', '', 'g'), 15);
   if new.sex not in ('', 'F', 'M') then new.sex := old.sex; end if;
   if new.birth_date < date '1900-01-01' or new.birth_date > current_date then new.birth_date := old.birth_date; end if;
   new.school := left(new.school, 160);
