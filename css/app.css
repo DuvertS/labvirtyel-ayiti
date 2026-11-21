@@ -163,9 +163,14 @@ textarea.code { width: 100%; font-family: Consolas, monospace; font-size: .78rem
 .form-row input[type=text], .form-row input[type=tel], .form-row input[type=date], .form-row select { width: 100%; font: inherit; padding: 9px 11px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); }
 /* Administration : fiche d'un participant */
 .admin-table td small { display: block; }
-.admin-table td:first-child { white-space: normal; min-width: 230px; max-width: 300px; }
+.admin-table { font-size: .9rem; }
+.admin-table th, .admin-table td { padding: 8px 6px; }
+.admin-table th { white-space: normal; vertical-align: bottom; }
+.admin-table td:first-child { white-space: normal; min-width: 210px; max-width: 260px; }
+.admin-table td:first-child small { overflow-wrap: anywhere; }
+.admin-table td .st + .btn { display: block; margin-top: 4px; }   /* statut au-dessus du bouton Suspendre */
 .admin-table td:first-child .st { display: inline-block; margin: 3px 4px 0 0; }
-.admin-table select[data-role] { min-width: 150px; }
+.admin-table select[data-role] { min-width: 128px; padding: 6px 8px; }
 .fiche-dl dd { overflow-wrap: anywhere; }
 .admin-table [data-details] { margin-top: 6px; }
 .admin-table tr.open td { background: var(--accent-soft); }
