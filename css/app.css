@@ -161,6 +161,24 @@ textarea.code { width: 100%; font-family: Consolas, monospace; font-size: .78rem
 .form-row { margin-bottom: 12px; }
 .form-row label { display: block; font-size: .9rem; margin-bottom: 4px; font-weight: 600; }
 .form-row input[type=text], .form-row input[type=tel], .form-row input[type=date], .form-row select { width: 100%; font: inherit; padding: 9px 11px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+/* Administration : fiche d'un participant */
+.admin-table td small { display: block; }
+.admin-table td:first-child { white-space: normal; min-width: 230px; max-width: 300px; }
+.admin-table td:first-child .st { display: inline-block; margin: 3px 4px 0 0; }
+.admin-table select[data-role] { min-width: 150px; }
+.fiche-dl dd { overflow-wrap: anywhere; }
+.admin-table [data-details] { margin-top: 6px; }
+.admin-table tr.open td { background: var(--accent-soft); }
+.admin-table tr.fiche-row td { white-space: normal; background: var(--surface); border-bottom: 2px solid var(--accent); }
+.fiche-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 24px; padding: 8px 4px; }
+@media (max-width: 900px) { .fiche-grid { grid-template-columns: 1fr; } }
+.fiche h3 { margin: 0 0 10px; font-size: 1rem; }
+.fiche .fld .err { display: block; color: var(--red); font-size: .8rem; }
+.fiche .fld .err:empty { display: none; }
+.fiche [aria-invalid=true] { border-color: var(--red) !important; }
+.fiche-dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: .92rem; }
+.fiche-dl dt { color: var(--muted); }
+.fiche-dl dd { margin: 0; }
 .form-row .err { display: block; min-height: 0; color: var(--red); font-size: .8rem; margin-top: 3px; }
 .form-row .err:empty { display: none; }
 .form-row [aria-invalid=true] { border-color: var(--red); }
@@ -388,7 +406,7 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .contrib-wrap .section-head { margin-top: 0; }
 
 /* Administration */
-.admin-kpis { grid-template-columns: repeat(6, 1fr); }
+.admin-kpis { grid-template-columns: repeat(7, 1fr); }
 @media (max-width: 900px) { .admin-kpis { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 520px) { .admin-kpis { grid-template-columns: repeat(2, 1fr); } }
 .kpi b { display: block; font-size: 1.6rem; font-family: var(--font-title); color: var(--accent); }

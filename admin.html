@@ -52,7 +52,26 @@
   var D = APP.D, esc = APP.esc, sb = AUTH.client;
   var page = document.getElementById('page');
   var me = null, people = [], prog = [], res = [], tab = 'participants', loadedAt = null, error = null;
-  var f = { q: '', role: '', status: '' };
+  var f = { q: '', role: '', status: '', info: '' }, openId = null;
+
+  /* Informations personnelles (mêmes règles que l'inscription) */
+  var NOM_OK = /^\p{L}+(?:[ '’-]\p{L}+)*$/u, PAS_LETTRE = /[^\p{L} '’-]/gu;
+  var INFO = ['last_name', 'first_name', 'sex', 'birth_date', 'address', 'phone'];
+  var SEX = { F: ['Féminin', 'Fi'], M: ['Masculin', 'Gason'] };
+  function check(key, v) {
+    if (key === 'school') return '';
+    if (!v) return LV.t('Obligatoire', 'Obligatwa');
+    if (key === 'last_name' || key === 'first_name') return v.length >= 2 && NOM_OK.test(v) ? '' : LV.t('Lettres seulement (2 au moins)', 'Lèt sèlman (omwen 2)');
+    if (key === 'sex') return v === 'F' || v === 'M' ? '' : LV.t('Obligatoire', 'Obligatwa');
+    if (key === 'birth_date') { var a = age(v); return /^\d{4}-\d{2}-\d{2}$/.test(v) && a >= 5 && a <= 120 ? '' : LV.t('Date non valable', 'Dat la pa bon'); }
+    if (key === 'address') return v.length >= 5 ? '' : LV.t('Adresse trop courte', 'Adrès la twò kout');
+    if (key === 'phone') return /^[0-9]{8,15}$/.test(v) ? '' : LV.t('8 à 15 chiffres', '8 a 15 chif');
+    return '';
+  }
+  function age(d) { return d ? Math.floor((Date.now() - new Date(d + 'T00:00:00').getTime()) / 31557600000) : null; }
+  function incomplete(p) { return INFO.some(function (k) { return check(k, p[k] || ''); }); }
+  function displayName(p) { return p.last_name || p.first_name ? ((p.last_name || '').toUpperCase() + ' ' + (p.first_name || '')).trim() : (p.full_name || '—'); }
+  function birth(p) { return p.birth_date ? new Date(p.birth_date + 'T00:00:00').toLocaleDateString('fr-FR') + ' (' + age(p.birth_date) + ' ' + LV.t('ans', 'an') + ')' : '—'; }
   var PT = { eleve: ['Élève', 'Elèv'], etudiant: ['Étudiant', 'Etidyan'], enseignant: ['Enseignant', 'Pwofesè'], formateur: ['Formateur', 'Fòmatè'], public: ['Grand public', 'Piblik'] };
   var ROLE = { apprenant: ['Apprenant', 'Aprann'], enseignant: ['Enseignant', 'Pwofesè'], admin: ['Administrateur', 'Administratè'] };
   function t2(a) { return LV.t(a[0], a[1]); }
@@ -86,6 +105,7 @@
       [active7, LV.t('Actifs sur 7 jours', 'Aktif nan 7 jou')],
       [people.filter(function (p) { return p.role === 'enseignant'; }).length, LV.t('Enseignants validés', 'Pwofesè valide')],
       [people.filter(function (p) { return p.teacher_status === 'en_attente'; }).length, LV.t('Demandes enseignant', 'Demann pwofesè'), 'demandes'],
+      [people.filter(incomplete).length, LV.t('Profils incomplets', 'Pwofil ki pa konplè'), 'incomplets'],
       [res.filter(function (r) { return r.status === 'en_attente'; }).length, LV.t('Ressources à valider', 'Resous pou valide'), 'validation']
     ];
     return '<div class="kpis admin-kpis">' + list.map(function (k) {
@@ -119,13 +139,15 @@
   function participants() {
     var q = f.q.toLowerCase();
     var rows = people.filter(function (p) {
-      return (!q || (p.full_name + ' ' + p.email + ' ' + p.school).toLowerCase().indexOf(q) >= 0) &&
-        (!f.role || p.role === f.role) && (!f.status || p.status === f.status);
+      var hay = [p.full_name, p.last_name, p.first_name, p.email, p.school, p.phone, p.address].join(' ').toLowerCase();
+      return (!q || hay.indexOf(q) >= 0) && (!f.role || p.role === f.role) && (!f.status || p.status === f.status) &&
+        (!f.info || (f.info === 'incomplet' ? incomplete(p) : !incomplete(p)));
     });
     return '<div class="panel"><div class="lib-top">' +
-      '<input type="search" id="fq" placeholder="' + esc(LV.t('Nom, e-mail ou établissement…', 'Non, imèl oswa lekòl…')) + '" value="' + esc(f.q) + '">' +
+      '<input type="search" id="fq" placeholder="' + esc(LV.t('Nom, e-mail, téléphone, adresse…', 'Non, imèl, telefòn, adrès…')) + '" value="' + esc(f.q) + '">' +
       '<select id="frole"><option value="">' + LV.t('Tous les rôles', 'Tout wòl yo') + '</option>' + Object.keys(ROLE).map(function (k) { return '<option value="' + k + '"' + (f.role === k ? ' selected' : '') + '>' + t2(ROLE[k]) + '</option>'; }).join('') + '</select>' +
       '<select id="fstatus"><option value="">' + LV.t('Tous les statuts', 'Tout estati yo') + '</option><option value="actif"' + (f.status === 'actif' ? ' selected' : '') + '>' + LV.t('Actif', 'Aktif') + '</option><option value="suspendu"' + (f.status === 'suspendu' ? ' selected' : '') + '>' + LV.t('Suspendu', 'Sispann') + '</option></select>' +
+      '<select id="finfo"><option value="">' + LV.t('Toutes les fiches', 'Tout fich yo') + '</option><option value="incomplet"' + (f.info === 'incomplet' ? ' selected' : '') + '>' + LV.t('Informations incomplètes', 'Enfòmasyon pa konplè') + '</option><option value="complet"' + (f.info === 'complet' ? ' selected' : '') + '>' + LV.t('Informations complètes', 'Enfòmasyon konplè') + '</option></select>' +
       '<button class="btn" id="csv">' + LV.t('Exporter (CSV)', 'Ekspòte (CSV)') + '</button></div>' +
       '<div class="count">' + rows.length + ' ' + LV.t('participant(s)', 'patisipan') + '</div>' +
       '<div class="table-wrap"><table class="matrix admin-table"><thead><tr>' +
@@ -133,22 +155,61 @@
        LV.t('Dernière activité', 'Dènye aktivite'), LV.t('Terminées', 'Fini'), LV.t('Quiz', 'Quiz')].map(function (h) { return '<th>' + h + '</th>'; }).join('') +
       '</tr></thead><tbody>' + rows.map(function (p) {
         var s = stats(p.id), self = p.id === me.id;
-        return '<tr data-id="' + p.id + '"><td><b>' + esc(p.full_name || '—') + '</b><small>' + esc(p.email) + (p.school ? ' · ' + esc(p.school) : '') + '</small>' +
-          (p.email_confirmed_at ? '' : '<small class="st warn">' + LV.t('E-mail non confirmé', 'Imèl pa konfime') + '</small>') + '</td>' +
+        return '<tr data-id="' + p.id + '"' + (openId === p.id ? ' class="open"' : '') + '><td><b>' + esc(displayName(p)) + '</b><small>' + esc(p.email) + (p.phone ? ' · ' + esc(p.phone) : '') + '</small>' +
+          '<small>' + (p.sex ? t2(SEX[p.sex]) : '') + (p.birth_date ? (p.sex ? ' · ' : '') + age(p.birth_date) + ' ' + LV.t('ans', 'an') : '') + (p.school ? ' · ' + esc(p.school) : '') + '</small>' +
+          (p.email_confirmed_at ? '' : '<small class="st warn">' + LV.t('E-mail non confirmé', 'Imèl pa konfime') + '</small>') +
+          (incomplete(p) ? '<small class="st warn">' + LV.t('Informations incomplètes', 'Enfòmasyon pa konplè') + '</small>' : '') +
+          '<button class="btn small" data-details aria-expanded="' + (openId === p.id) + '">' + (openId === p.id ? LV.t('Fermer la fiche', 'Fèmen fich la') : LV.t('Voir la fiche', 'Wè fich la')) + '</button></td>' +
           '<td>' + t2(PT[p.profile_type] || PT.public) + '</td>' +
           '<td><select data-role' + (self ? ' disabled title="' + esc(LV.t('Vous ne pouvez pas changer votre propre rôle', 'Ou pa ka chanje pwòp wòl ou')) + '"' : '') + '>' + Object.keys(ROLE).map(function (k) {
             return '<option value="' + k + '"' + (p.role === k ? ' selected' : '') + '>' + t2(ROLE[k]) + '</option>'; }).join('') + '</select></td>' +
           '<td><span class="st ' + (p.status === 'actif' ? 'good' : 'bad') + '">' + (p.status === 'actif' ? LV.t('Actif', 'Aktif') : LV.t('Suspendu', 'Sispann')) + '</span>' +
           (self ? '' : '<button class="btn small" data-toggle>' + (p.status === 'actif' ? LV.t('Suspendre', 'Sispann') : LV.t('Réactiver', 'Reaktive')) + '</button>') + '</td>' +
           '<td>' + COMM.date(p.created_at) + '</td><td>' + COMM.date(p.last_seen) + '</td>' +
-          '<td>' + s.done + '</td><td>' + (s.avg == null ? '—' : s.avg + ' %') + '</td></tr>';
+          '<td>' + s.done + '</td><td>' + (s.avg == null ? '—' : s.avg + ' %') + '</td></tr>' +
+          (openId === p.id ? '<tr class="fiche-row"><td colspan="8">' + fiche(p, s) + '</td></tr>' : '');
       }).join('') + '</tbody></table></div></div>';
+  }
+
+  /* Fiche complète d'un participant, modifiable par l'administrateur */
+  function fiche(p, s) {
+    function inp(id, key, label, attrs) {
+      return '<label class="fld"><span>' + label + '</span><input id="' + id + '" data-k="' + key + '" value="' + esc(p[key] || '') + '" ' + attrs + '><small class="err"></small></label>';
+    }
+    return '<div class="fiche" data-fiche="' + p.id + '">' +
+      '<div class="fiche-grid">' +
+        '<div><h3>' + LV.t('Identité et coordonnées', 'Idantite ak kowòdone') + '</h3>' +
+          '<div class="fld-row">' + inp('a-ln', 'last_name', LV.t('Nom', 'Non'), 'type="text" maxlength="60" data-filtre="lettres"') +
+            inp('a-fn', 'first_name', LV.t('Prénom', 'Prenon'), 'type="text" maxlength="60" data-filtre="lettres"') + '</div>' +
+          '<div class="fld-row"><label class="fld"><span>' + LV.t('Sexe', 'Sèks') + '</span><select data-k="sex"><option value="">—</option>' +
+            Object.keys(SEX).map(function (k) { return '<option value="' + k + '"' + (p.sex === k ? ' selected' : '') + '>' + t2(SEX[k]) + '</option>'; }).join('') + '</select><small class="err"></small></label>' +
+            inp('a-bd', 'birth_date', LV.t('Date de naissance', 'Dat nesans'), 'type="date" min="1900-01-01" max="' + new Date().toISOString().slice(0, 10) + '"') + '</div>' +
+          inp('a-ad', 'address', LV.t('Adresse', 'Adrès'), 'type="text" maxlength="200"') +
+          '<div class="fld-row">' + inp('a-ph', 'phone', LV.t('Téléphone', 'Telefòn'), 'type="tel" maxlength="15" inputmode="numeric" data-filtre="chiffres"') +
+            inp('a-sc', 'school', LV.t('Établissement', 'Lekòl'), 'type="text" maxlength="160"') + '</div>' +
+          '<div class="btn-row"><button class="btn primary" data-save>' + LV.t('Enregistrer les modifications', 'Anrejistre chanjman yo') + '</button>' +
+            '<span class="muted" data-saved></span></div>' +
+        '</div>' +
+        '<div><h3>' + LV.t('Compte et activité', 'Kont ak aktivite') + '</h3><dl class="fiche-dl">' +
+          [[LV.t('E-mail', 'Imèl'), '<a href="mailto:' + esc(p.email) + '">' + esc(p.email) + '</a>' + (p.email_confirmed_at ? ' <span class="st good">' + LV.t('confirmé', 'konfime') + '</span>' : ' <span class="st warn">' + LV.t('non confirmé', 'pa konfime') + '</span>')],
+           [LV.t('Téléphone', 'Telefòn'), p.phone ? '<a href="tel:+' + esc(p.phone) + '">' + esc(p.phone) + '</a>' : '—'],
+           [LV.t('Date de naissance', 'Dat nesans'), birth(p)],
+           [LV.t('Profil', 'Pwofil'), t2(PT[p.profile_type] || PT.public)],
+           [LV.t('Rôle', 'Wòl'), t2(ROLE[p.role] || ROLE.apprenant)],
+           [LV.t('Demande enseignant', 'Demann pwofesè'), ({ aucun: '—', en_attente: LV.t('en attente', 'ap tann'), approuve: LV.t('validée', 'valide'), refuse: LV.t('refusée', 'refize') })[p.teacher_status] || '—'],
+           [LV.t('Statut', 'Estati'), p.status === 'actif' ? LV.t('Actif', 'Aktif') : LV.t('Suspendu', 'Sispann')],
+           [LV.t('Inscription', 'Enskripsyon'), COMM.date(p.created_at)],
+           [LV.t('Dernière activité', 'Dènye aktivite'), COMM.date(p.last_seen)],
+           [LV.t('Ressources terminées', 'Resous fini'), s.done + ' / ' + D.resources.length],
+           [LV.t('Moyenne aux quiz', 'Mwayèn quiz'), s.avg == null ? '—' : s.avg + ' %']].map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>'; }).join('') +
+        '</dl></div>' +
+      '</div></div>';
   }
 
   function demandes() {
     var rows = people.filter(function (p) { return p.teacher_status === 'en_attente'; });
     return '<div class="panel">' + (rows.length ? '<div class="cres-list">' + rows.map(function (p) {
-      return '<article class="cres" data-id="' + p.id + '"><h3>' + esc(p.full_name || '—') + '</h3><p class="muted">' + esc(p.email) + ' · ' + t2(PT[p.profile_type] || PT.public) +
+      return '<article class="cres" data-id="' + p.id + '"><h3>' + esc(displayName(p)) + '</h3><p class="muted">' + esc(p.email) + (p.phone ? ' · ' + esc(p.phone) : '') + ' · ' + t2(PT[p.profile_type] || PT.public) +
         (p.school ? ' · ' + esc(p.school) : '') + '</p><p class="by">' + LV.t('Inscrit le ', 'Enskri ') + COMM.date(p.created_at) +
         (p.email_confirmed_at ? '' : ' · <span class="st warn">' + LV.t('E-mail non confirmé', 'Imèl pa konfime') + '</span>') + '</p>' +
         '<div class="btn-row"><button class="btn primary" data-approve>' + LV.t('Valider comme enseignant', 'Valide kòm pwofesè') + '</button>' +
@@ -188,17 +249,23 @@
   }
 
   function bind() {
-    page.querySelectorAll('[data-go]').forEach(function (k) { k.addEventListener('click', function () { tab = k.getAttribute('data-go'); render(); }); });
+    page.querySelectorAll('[data-go]').forEach(function (k) { k.addEventListener('click', function () {
+      var g = k.getAttribute('data-go');
+      if (g === 'incomplets') { tab = 'participants'; f.info = 'incomplet'; } else tab = g;
+      render();
+    }); });
     page.querySelectorAll('.admin-tabs button').forEach(function (b) { b.addEventListener('click', function () { tab = b.getAttribute('data-tab'); render(); }); });
     var fq = document.getElementById('fq');
     if (fq) {
       fq.addEventListener('input', function () { f.q = fq.value; var pos = fq.selectionStart; render(); var n = document.getElementById('fq'); n.focus(); n.setSelectionRange(pos, pos); });
       document.getElementById('frole').addEventListener('change', function (e) { f.role = e.target.value; render(); });
       document.getElementById('fstatus').addEventListener('change', function (e) { f.status = e.target.value; render(); });
+      document.getElementById('finfo').addEventListener('change', function (e) { f.info = e.target.value; render(); });
       document.getElementById('csv').addEventListener('click', csv);
     }
     page.querySelectorAll('tr[data-id]').forEach(function (tr) {
       var id = tr.getAttribute('data-id'), p = people.filter(function (x) { return x.id === id; })[0];
+      tr.querySelector('[data-details]').addEventListener('click', function () { openId = openId === id ? null : id; render(); });
       var sel = tr.querySelector('[data-role]');
       sel.addEventListener('change', function () {
         var role = sel.value, upd = { role: role };
@@ -209,6 +276,27 @@
       if (tg) tg.addEventListener('click', function () {
         if (p.status === 'actif' && tg.getAttribute('data-sure') !== '1') { tg.setAttribute('data-sure', '1'); tg.textContent = LV.t('Confirmer', 'Konfime'); return; }
         act(sb.from('profiles').update({ status: p.status === 'actif' ? 'suspendu' : 'actif' }).eq('id', id), tg);
+      });
+    });
+    page.querySelectorAll('[data-fiche]').forEach(function (box) {
+      var id = box.getAttribute('data-fiche');
+      box.querySelectorAll('[data-filtre]').forEach(function (el) {
+        el.addEventListener('input', function () {
+          var v = el.value, c = el.getAttribute('data-filtre') === 'chiffres' ? v.replace(/[^0-9]/g, '') : v.replace(PAS_LETTRE, '');
+          if (c !== v) { var pos = el.selectionStart - (v.length - c.length); el.value = c; try { el.setSelectionRange(pos, pos); } catch (e) {} }
+        });
+      });
+      box.querySelector('[data-save]').addEventListener('click', function () {
+        var upd = {}, ok = true;
+        box.querySelectorAll('[data-k]').forEach(function (el) {
+          var k = el.getAttribute('data-k'), v = el.value.trim(), m = check(k, v);
+          var err = el.parentNode.querySelector('.err'); if (err) err.textContent = m;
+          el.setAttribute('aria-invalid', m ? 'true' : 'false');
+          if (m) ok = false; else upd[k] = k === 'birth_date' && !v ? null : v;
+        });
+        if (!ok) { box.querySelector('[data-saved]').textContent = LV.t('Corrigez les champs en rouge.', 'Korije chan ki an wouj yo.'); return; }
+        upd.full_name = upd.first_name + ' ' + upd.last_name;
+        act(sb.from('profiles').update(upd).eq('id', id), this);
       });
     });
     page.querySelectorAll('[data-approve], [data-refuse]').forEach(function (b) {
