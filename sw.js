@@ -3,7 +3,7 @@
    IMPORTANT : à chaque modification du site, augmentez VERSION pour que les téléphones
    téléchargent la nouvelle version. */
 
-var VERSION = 'lv-v15';
+var VERSION = 'lv-v16';
 var FILES = [
   './',
   'index.html', 'bibliotheque.html', 'ressource.html', 'parcours.html', 'etudiant.html', 'enseignant.html', 'installer.html', 'profil.html', 'simulations.html', 'compte.html', 'confidentialite.html', 'communaute.html', 'contribuer.html', 'admin.html',
@@ -11,7 +11,7 @@ var FILES = [
   'js/theme.js', 'js/gate.js', 'js/config.js', 'js/auth.js', 'js/community.js', 'js/vendor/supabase.js', 'js/common.js', 'js/data.js', 'js/data-materiel.js', 'js/app.js', 'js/classe.js',
   'sims/pendule.html', 'sims/titrage.html', 'sims/mendel.html', 'sims/ohm.html', 'sims/logique.html', 'sims/sir.html', 'sims/solaire.html',
   'manifest.webmanifest',
-  'img/sims/pendule.jpg', 'img/sims/titrage.jpg', 'img/sims/mendel.jpg', 'img/sims/ohm.jpg', 'img/sims/logique.jpg', 'img/sims/sir.jpg', 'img/sims/solaire.jpg', 'img/fond-lab.jpg', 'img/fond-tableau.jpg',
+  'img/sims/pendule.jpg', 'img/sims/titrage.jpg', 'img/sims/mendel.jpg', 'img/sims/ohm.jpg', 'img/sims/logique.jpg', 'img/sims/sir.jpg', 'img/sims/solaire.jpg', 'img/fond-lab.jpg', 'img/fond-tableau.jpg', 'img/fond-admin.jpg',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'
 ];
 

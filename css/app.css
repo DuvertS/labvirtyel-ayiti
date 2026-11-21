@@ -437,3 +437,12 @@ table.fiche th { text-align: left; font-weight: 600; color: var(--muted); paddin
 table.fiche td { padding: 4px 0; }
 .article .note { font-size: .88rem; color: var(--muted); border-left: 3px solid var(--border); padding-left: 10px; }
 .more-row { text-align: center; margin-top: 16px; }
+
+/* Administration : fond réseau (img/fond-admin.jpg), voile sombre, texte clair posé sur l'image */
+body.admin-page { background-image: linear-gradient(rgba(6, 14, 30, .55), rgba(6, 14, 30, .55)), url("../img/fond-admin.jpg");
+  background-size: auto, cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
+[data-palette="contraste"] body.admin-page { background-image: none; }
+body.admin-page main > .section-head h1, body.admin-page #asof, body.admin-page footer.site { color: #f2f5fa; }
+[data-palette="contraste"] body.admin-page main > .section-head h1, [data-palette="contraste"] body.admin-page #asof,
+[data-palette="contraste"] body.admin-page footer.site { color: var(--text); }
+.not-admin pre.sql { background: var(--bg); border: 1px solid var(--border); padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .85rem; }
