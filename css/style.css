@@ -66,7 +66,10 @@ body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--
 body { --fond-voile: 82%;
   background-image: linear-gradient(color-mix(in srgb, var(--bg) var(--fond-voile), transparent), color-mix(in srgb, var(--bg) var(--fond-voile), transparent)), url("../img/fond-lab.jpg");
   background-size: auto, 600px 600px; background-repeat: repeat; background-attachment: fixed; }
-[data-mode="sombre"] body { --fond-voile: 93%; }
+/* Mode sombre : tableau noir (img/fond-tableau.jpg), voile plus léger pour qu'il reste bien visible */
+[data-mode="sombre"] body { --fond-voile: 72%;
+  background-image: linear-gradient(color-mix(in srgb, var(--bg) var(--fond-voile), transparent), color-mix(in srgb, var(--bg) var(--fond-voile), transparent)), url("../img/fond-tableau.jpg");
+  background-size: auto, cover; background-repeat: no-repeat; background-position: center; }
 [data-palette="contraste"] body { background-image: none; }   /* accessibilité : fond uni */
 a { color: var(--accent); }
 h1, h2, h3, .brand { font-family: var(--font-title); font-weight: 700; letter-spacing: 0; }

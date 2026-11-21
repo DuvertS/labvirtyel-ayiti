@@ -246,7 +246,7 @@
       return [p.full_name, p.email, p.school, (PT[p.profile_type] || PT.public)[0], ROLE[p.role][0], p.status, p.email_confirmed_at ? 'oui' : 'non',
         (p.created_at || '').slice(0, 10), (p.last_seen || '').slice(0, 10), s.done, s.avg == null ? '' : s.avg].map(cell).join(';');
     }));
-    var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var blob = new Blob(['' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = 'participants-labvirtyel-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
