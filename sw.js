@@ -3,7 +3,7 @@
    IMPORTANT : à chaque modification du site, augmentez VERSION pour que les téléphones
    téléchargent la nouvelle version. */
 
-var VERSION = 'lv-v12';
+var VERSION = 'lv-v13';
 var FILES = [
   './',
   'index.html', 'bibliotheque.html', 'ressource.html', 'parcours.html', 'etudiant.html', 'enseignant.html', 'installer.html', 'profil.html', 'simulations.html', 'compte.html', 'confidentialite.html', 'communaute.html', 'contribuer.html', 'admin.html',

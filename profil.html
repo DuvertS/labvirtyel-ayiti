@@ -65,9 +65,45 @@
     }).join('') + '</div>';
   }
 
+  /* Informations personnelles : mêmes règles que le formulaire d'inscription (compte.html) */
+  var NOM_OK = /^\p{L}+(?:[ '’-]\p{L}+)*$/u, PAS_LETTRE = /[^\p{L} '’-]/gu;
+  var FIELDS = { plast: 'last_name', pfirst: 'first_name', psex: 'sex', pbirth: 'birth_date', paddr: 'address', pphone: 'phone', pschool: 'school' };
+  function check(key, v) {               /* renvoie un message d'erreur, ou '' si la valeur est bonne */
+    if (key === 'school') return '';
+    if (!v) return LV.t('Obligatoire', 'Obligatwa');
+    if (key === 'last_name' || key === 'first_name') return v.length >= 2 && NOM_OK.test(v) ? '' : LV.t('Lettres seulement (2 au moins)', 'Lèt sèlman (omwen 2)');
+    if (key === 'sex') return v === 'F' || v === 'M' ? '' : LV.t('Obligatoire', 'Obligatwa');
+    if (key === 'birth_date') {
+      var age = (Date.now() - new Date(v + 'T00:00:00').getTime()) / 31557600000;
+      return /^\d{4}-\d{2}-\d{2}$/.test(v) && age >= 5 && age <= 120 ? '' : LV.t('Date non valable', 'Dat la pa bon');
+    }
+    if (key === 'address') return v.length >= 5 ? '' : LV.t('Adresse trop courte', 'Adrès la twò kout');
+    if (key === 'phone') return /^[0-9]{8,15}$/.test(v) ? '' : LV.t('8 à 15 chiffres', '8 a 15 chif');
+    return '';
+  }
+  function missing(p) {
+    return ['last_name', 'first_name', 'sex', 'birth_date', 'address', 'phone'].some(function (k) { return check(k, p[k] || ''); });
+  }
+  function row(id, label, input) {
+    return '<div class="form-row"><label for="' + id + '">' + label + '</label>' + input + '<small class="err" id="' + id + '-err"></small></div>';
+  }
+  function showErr(id, key, v) {
+    var m = check(key, v), el = document.getElementById(id), e = document.getElementById(id + '-err');
+    if (el) el.setAttribute('aria-invalid', m ? 'true' : 'false');
+    if (e) e.textContent = m;
+    return !m;
+  }
+
+  /* Au premier affichage, les informations du compte en ligne font foi */
+  var fromAccount = false;
   function render() {
     var p = profile(), pr = LV.prefs(), acc = AUTH.cached();
-    if (acc) { p.name = acc.full_name; p.school = acc.school; p.role = acc.profile_type; saveProfile(p); }
+    if (acc && !fromAccount) {
+      fromAccount = true;
+      p.name = acc.full_name; p.school = acc.school; p.role = acc.profile_type;
+      ['last_name', 'first_name', 'sex', 'birth_date', 'address', 'phone'].forEach(function (k) { p[k] = acc[k] || ''; });
+      saveProfile(p);
+    }
     var palette = pr.palette || 'classique', mode = pr.mode || 'auto', taille = pr.taille || 'normal';
     var curMode = document.documentElement.getAttribute('data-mode');
 
@@ -86,8 +122,21 @@
 
       /* --- informations --- */
       '<div class="panel"><h2>' + LV.t('Mes informations', 'Enfòmasyon mwen') + '<span class="saved" id="saved">' + LV.t('Enregistré', 'Anrejistre') + '</span></h2>' +
-        '<div class="form-row"><label for="pname">' + LV.t('Nom complet', 'Non konplè') + '</label><input type="text" id="pname" value="' + esc(p.name || '') + '"></div>' +
-        '<div class="form-row"><label for="pschool">' + LV.t('Établissement', 'Lekòl / inivèsite') + '</label><input type="text" id="pschool" value="' + esc(p.school || '') + '"></div>' +
+        (missing(p) ? '<p class="alert info show">' + LV.t('Complétez vos informations : nom, prénom, sexe, date de naissance, adresse et téléphone sont obligatoires.',
+          'Konplete enfòmasyon ou : non, prenon, sèks, dat nesans, adrès ak telefòn obligatwa.') + '</p>' : '') +
+        '<div class="fld-row">' +
+          row('plast', LV.t('Nom', 'Non'), '<input type="text" id="plast" maxlength="60" autocomplete="family-name" data-filtre="lettres" value="' + esc(p.last_name || '') + '">') +
+          row('pfirst', LV.t('Prénom', 'Prenon'), '<input type="text" id="pfirst" maxlength="60" autocomplete="given-name" data-filtre="lettres" value="' + esc(p.first_name || '') + '">') +
+        '</div><div class="fld-row">' +
+          row('psex', LV.t('Sexe', 'Sèks'), '<select id="psex"><option value="">' + LV.t('Choisir…', 'Chwazi…') + '</option>' +
+            [['F', 'Féminin', 'Fi'], ['M', 'Masculin', 'Gason']].map(function (s) {
+              return '<option value="' + s[0] + '"' + (p.sex === s[0] ? ' selected' : '') + '>' + LV.t(s[1], s[2]) + '</option>';
+            }).join('') + '</select>') +
+          row('pbirth', LV.t('Date de naissance', 'Dat nesans'), '<input type="date" id="pbirth" min="1900-01-01" max="' + new Date().toISOString().slice(0, 10) + '" value="' + esc(p.birth_date || '') + '">') +
+        '</div>' +
+        row('paddr', LV.t('Adresse', 'Adrès'), '<input type="text" id="paddr" maxlength="200" autocomplete="street-address" placeholder="' + LV.t('Rue, quartier, ville', 'Ri, katye, vil') + '" value="' + esc(p.address || '') + '">') +
+        row('pphone', LV.t('Téléphone (chiffres seulement)', 'Telefòn (chif sèlman)'), '<input type="tel" id="pphone" maxlength="15" inputmode="numeric" autocomplete="tel" placeholder="50934123456" data-filtre="chiffres" value="' + esc(p.phone || '') + '">') +
+        row('pschool', LV.t('Établissement (facultatif)', 'Lekòl / inivèsite (si genyen)'), '<input type="text" id="pschool" maxlength="160" value="' + esc(p.school || '') + '">') +
         '<div class="form-row"><label>' + LV.t('Je suis', 'Mwen se') + '</label><div class="roles">' +
           ROLES.map(function (r) {
             return '<label><input type="radio" name="role" value="' + r[0] + '"' + (p.role === r[0] ? ' checked' : '') + '>' + LV.t(r[1], r[2]) + '</label>';
@@ -148,8 +197,11 @@
     pushTimer = setTimeout(async function () {
       var acc = AUTH.cached(), p = profile();
       if (!acc || !navigator.onLine) return;
-      var r = await AUTH.client.from('profiles').update({ full_name: p.name || '', school: p.school || '', profile_type: p.role || acc.profile_type })
-        .eq('id', acc.id).select().maybeSingle();
+      var upd = { school: p.school || '', profile_type: p.role || acc.profile_type };
+      /* seules les valeurs valables partent vers le serveur ; une valeur incomplète reste sur l'appareil */
+      ['last_name', 'first_name', 'sex', 'birth_date', 'address', 'phone'].forEach(function (k) { if (!check(k, p[k] || '')) upd[k] = p[k]; });
+      if (upd.first_name && upd.last_name) upd.full_name = upd.first_name + ' ' + upd.last_name;
+      var r = await AUTH.client.from('profiles').update(upd).eq('id', acc.id).select().maybeSingle();
       if (r.data) { localStorage.setItem('lv-account', JSON.stringify(r.data)); }
     }, 800);
   }
@@ -182,9 +234,18 @@
   }
 
   function wire() {
-    ['pname', 'pschool'].forEach(function (id) {
-      document.getElementById(id).addEventListener('input', function () {
-        var p = profile(); p[id === 'pname' ? 'name' : 'school'] = this.value.trim(); saveProfile(p); flashSaved(); pushAccount();
+    Object.keys(FIELDS).forEach(function (id) {
+      var el = document.getElementById(id), key = FIELDS[id];
+      var p0 = profile(); if (p0[key] || key === 'school') showErr(id, key, (p0[key] || '').trim());
+      el.addEventListener(el.tagName === 'SELECT' || el.type === 'date' ? 'change' : 'input', function () {
+        var f = el.getAttribute('data-filtre'), v = el.value;
+        if (f) {     /* lettres seulement (nom, prénom) ou chiffres seulement (téléphone) */
+          var c = f === 'chiffres' ? v.replace(/[^0-9]/g, '') : v.replace(PAS_LETTRE, '');
+          if (c !== v) { var pos = el.selectionStart - (v.length - c.length); el.value = c; try { el.setSelectionRange(pos, pos); } catch (e) {} }
+        }
+        var p = profile(); p[key] = el.value.trim();
+        if (p.first_name || p.last_name) p.name = ((p.first_name || '') + ' ' + (p.last_name || '')).trim();   /* nom affiché dans « Ma classe » */
+        saveProfile(p); showErr(id, key, p[key]); flashSaved(); pushAccount();
       });
     });
     page.querySelectorAll('input[name=role]').forEach(function (r) {
